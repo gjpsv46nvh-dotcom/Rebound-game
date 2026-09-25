@@ -40,3 +40,10 @@ Upload `index.html` over the existing GitHub `index.html` to update the Vercel d
 - No attack button or boss battles.
 - Every level is now focused on running, dodging, collecting and reaching the finish line.
 - Levels 5, 10, 15, 20 and 25 now finish normally instead of triggering a boss.
+
+## v8 slower opening levels
+- Levels 1–5 have a much slower running-speed curve.
+- Obstacles are spaced farther apart in Levels 1–5.
+- Chasing monsters do not appear until Level 4.
+- Early falling rocks and incoming enemies move more slowly.
+- Difficulty increases progressively after Level 5.

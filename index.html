@@ -68,7 +68,7 @@ function start(){
 }
 function beginRun(){
  hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];platforms=[];hazards=[];collapse=[];chase=null;finishShown=false;
- speed=(level===1?4.25:5.1+level*.10);p.y=ground()-180;p.vy=2;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
+ speed=({1:2.65,2:2.9,3:3.2,4:3.5,5:3.8}[level] || Math.min(5.8,3.8+(level-5)*0.10));p.y=ground()-180;p.vy=2;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
 }
 function planeIntro(){
  intro++;
@@ -90,12 +90,12 @@ function spawn(){
    let high=Math.random()<.5; for(let j=0;j<6;j++)objs.push({t:'coin',x:innerWidth+50+j*48,y:g-(high?150+j%2*35:75),w:30,h:30,e:j==5?'💎':'🪙',val:j==5?10:1});
    if(high) hazards.push({t:'fallrock',x:innerWidth+190,y:-60,w:48,h:48,vy:2.5,e:'🪨'});
  }
- else if(r<.61)objs.push({t:'incoming',x:innerWidth+60,y:g-75-Math.random()*80,w:48,h:48,e:'🦇',vx:3.5+level*.15});
- else if(r<.73)hazards.push({t:'fallrock',x:innerWidth*.55+Math.random()*innerWidth*.35,y:-70,w:52,h:52,vy:3+level*.08,e:'🪨'});
+ else if(r<.61)objs.push({t:'incoming',x:innerWidth+60,y:g-75-Math.random()*80,w:48,h:48,e:'🦇',vx:(level<=3?1.5+level*.10:2.5+level*.12)});
+ else if(r<.73)hazards.push({t:'fallrock',x:innerWidth*.55+Math.random()*innerWidth*.35,y:-70,w:52,h:52,vy:(level<=3?1.9+level*.08:2.6+level*.07),e:'🪨'});
  else if(r<.84){platforms.push({x:innerWidth+40,y:g-120-Math.random()*70,w:150,h:20,vy:(Math.random()<.5?-1:1)*.7});}
  else if(r<.93){collapse.push({x:innerWidth+30,y:g,w:180,h:25,timer:150});}
  else objs.push({t:'rock',x:innerWidth+50,y:g-40,w:45,h:40,e:'🪨'});
- if(level>=2 && Math.random()<.12 && !chase) chase={x:-90,y:g-62,w:60,h:60,e:'👹',life:360};
+ if(level>=4 && Math.random()<(level<=5?.06:.10) && !chase) chase={x:-90,y:g-62,w:60,h:60,e:'👹',life:360};
 }
 function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
 function attack(){if(!boss||!running)return;shots.push({x:p.x+45,y:p.y+22,w:22,h:12});}
