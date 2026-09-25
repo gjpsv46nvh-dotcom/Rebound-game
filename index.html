@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v36</title><style>
+<title>REBOUND v38</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -55,7 +55,7 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 <div class="sectiontitle">🌟 CHOOSE YOUR LEVEL</div>
 <div id="levelgrid"></div>
 <button id="go">▶ START ADVENTURE!</button>
-<div class="how">Tap to jump • Swipe down to slide • Collect coins • 3 lives</div>
+<div class="how">Swipe UP to jump • Swipe DOWN to slide • Collect coins • 3 lives</div>
 </div></div>
 <div id="rotateHint"><div>📱↻<br>ROTATE TO LANDSCAPE<small>Turn your phone sideways for the longer REBOUND course view.</small></div></div>
 <script>
@@ -81,6 +81,43 @@ function resize(){
 }resize();
 addEventListener("resize",resize);
 addEventListener("orientationchange",()=>setTimeout(resize,180));
+
+const THEMES=[
+{name:"THEME PARK",sky1:"#55c8ff",sky2:"#eafcff",ground:"#74573e",far:["🎡","🎢","🎪","🎈"],near:["🌳","🎠","🎟️"]},
+{name:"NIGHT CITY",sky1:"#080c29",sky2:"#273768",ground:"#25293d",far:["🌙","⭐","🏙️","🌃"],near:["🚕","💡","🚧"]},
+{name:"SPORTS WORLD",sky1:"#5dbbff",sky2:"#eefcff",ground:"#3e9949",far:["🏟️","🏆","⚽","🏀"],near:["🥅","🏈","🎾"]},
+{name:"ZOO ADVENTURE",sky1:"#8cddff",sky2:"#ecfbdc",ground:"#688e47",far:["🦒","🐘","🦁","🦓"],near:["🌴","🐒","🦜"]},
+{name:"DINOSAUR LAND",sky1:"#efa45c",sky2:"#ffe1a8",ground:"#6d6840",far:["🦕","🌋","🦖","🌄"],near:["🌿","🪨","🥚"]},
+{name:"GHOST WORLD",sky1:"#17182e",sky2:"#4c4261",ground:"#45434c",far:["🌕","🏚️","👻","🦇"],near:["🪦","🎃","🌫️"]},
+{name:"OCEAN RUN",sky1:"#39bee4",sky2:"#d8fbff",ground:"#d5bc79",far:["🏝️","🐬","⛵","🌊"],near:["🐠","🪸","🐚"]},
+{name:"SPACE RUN",sky1:"#05051b",sky2:"#28205a",ground:"#39374f",far:["🪐","🌌","🚀","👽"],near:["☄️","🛰️","🌑"]},
+{name:"JUNGLE",sky1:"#55ba7a",sky2:"#caf2aa",ground:"#496737",far:["🌴","🦜","🐒","⛰️"],near:["🌿","🐍","🪵"]},
+{name:"SNOW WORLD",sky1:"#a9ddff",sky2:"#f4fbff",ground:"#dbefff",far:["🏔️","❄️","⛄","🌨️"],near:["🌲","🧊","⛷️"]}
+];
+function themeForLevel(){return THEMES[(Math.max(1,level)-1)%THEMES.length]}
+function drawMovingWorld(){
+ let t=themeForLevel(), gy=ground();
+ let gr=X.createLinearGradient(0,0,0,H);
+ gr.addColorStop(0,t.sky1);gr.addColorStop(.68,t.sky2);gr.addColorStop(.681,t.ground);gr.addColorStop(1,"#30353c");
+ X.fillStyle=gr;X.fillRect(0,0,W,H);
+ X.textAlign="center";
+ X.font=Math.max(42,Math.min(82,W*.065))+"px system-ui";
+ for(let i=0;i<10;i++){
+   let gap=W/4,xx=((i*gap-dist*.16)%(W+gap)+(W+gap))%(W+gap)-gap;
+   X.fillText(t.far[i%t.far.length],xx,H*.39+(i%2)*18);
+ }
+ X.font=Math.max(30,Math.min(56,W*.045))+"px system-ui";
+ for(let i=0;i<12;i++){
+   let gap=W/5,xx=((i*gap-dist*.50)%(W+gap)+(W+gap))%(W+gap)-gap;
+   X.fillText(t.near[i%t.near.length],xx,H*.61+(i%3)*10);
+ }
+ X.fillStyle="#3d4148";X.fillRect(0,gy-8,W,H-gy+8);
+ X.strokeStyle="#f5f5f5";X.lineWidth=4;X.setLineDash([34,28]);X.lineDashOffset=-(dist*1.35)%62;
+ X.beginPath();X.moveTo(0,gy+27);X.lineTo(W,gy+27);X.stroke();X.setLineDash([]);
+ X.fillStyle="#fff";X.font="900 "+Math.max(14,Math.min(22,W*.02))+"px system-ui";X.fillText(t.name,W*.5,31);
+ X.textAlign="left";
+}
+
 function ground(){return H*.74}
 function bg(){
  // The generated target artwork is now the visual basis of the actual game.
@@ -132,11 +169,11 @@ function drawRunner(){
 function doJump(){if(run&&jy===0&&slide===0)jv=-10.8} function doSlide(){if(run&&jy===0)slide=42}
 function startGame(e){
  if(e){e.preventDefault();e.stopPropagation();}
- startEl.style.display="none";hudEl.style.display="flex";controlsEl.style.display="flex";document.getElementById("levelhud").textContent="LEVEL "+level+" • "+themeForLevel().name;run=true;frame=0;dist=0;coins=0;lives=3;hits=0;startCoins=0;obs=[];requestAnimationFrame(loop)
+ startEl.style.display="none";hudEl.style.display="flex";controlsEl.style.display="flex";let th=themeForLevel();document.getElementById("levelhud").textContent="LEVEL "+level+" • "+th.name;run=true;frame=0;dist=0;coins=0;lives=3;hits=0;startCoins=0;obs=[];requestAnimationFrame(loop)
 }
 const goBtn=document.getElementById("go");
 goBtn.onclick=startGame;jump.onclick=doJump;document.getElementById("slide").onclick=doSlide;
-let sy=0,moved=false;C.addEventListener("pointerdown",e=>{e.preventDefault();sy=e.clientY;moved=false},{passive:false});
+let sy=0,moved=false;
 C.addEventListener("pointermove",e=>{if(Math.abs(e.clientY-sy)>20)moved=true;e.preventDefault()},{passive:false});
 C.addEventListener("pointerup",e=>{e.preventDefault();let dy=e.clientY-sy;if(dy>40)doSlide();else if(!moved)doJump()},{passive:false});
 function end(ok){
@@ -162,9 +199,9 @@ function end(ok){
 }
 function loop(){
  if(!run)return;frame++;dist+=speed;if(inv>0)inv--;if(slide>0)slide--;jv+=.6;jy+=jv;if(jy>0){jy=0;jv=0};jy=Math.max(-112,jy);
- bg();if(frame%108===0&&dist<3100)spawn();for(const o of obs){o.x-=speed;obstacle(o)}
+ drawMovingWorld();if(frame%108===0&&dist<3100)spawn();for(const o of obs){o.x-=speed;obstacle(o)}
  let px=Math.max(90,W*.20);
- for(const o of obs){if(o.x>px+28&&o.x<px+155){if(o.t==="coin"){o.dead=true;coins++;}else if(inv===0&&jy>-50&&slide===0){o.dead=true;lives--;inv=65;if(lives<=0){end(false);return}}}}
+ for(const o of obs){if(o.x>px+28&&o.x<px+155){if(o.t==="coin"){o.dead=true;coins++;}else if(inv===0&&jy>-50&&slide===0){o.dead=true;lives--;hits++;inv=65;if(lives<=0){end(false);return}}}}
  obs=obs.filter(o=>!o.dead&&o.x>-100);X.globalAlpha=inv>0&&Math.floor(inv/6)%2?.35:1;drawRunner();X.globalAlpha=1;
  life.textContent="❤️".repeat(lives);coin.textContent="🪙 "+coins;
  if(dist>3400){end(true);return}requestAnimationFrame(loop)
@@ -182,5 +219,25 @@ try{
   const g=document.getElementById("levelgrid");
   if(g) g.innerHTML='<button class="lvl sel" type="button">LEVEL 1</button>';
 }
+
+
+let gestureStart=null;
+C.addEventListener("pointerdown",e=>{
+ if(!run)return;
+ gestureStart={x:e.clientX,y:e.clientY,id:e.pointerId};
+ try{C.setPointerCapture(e.pointerId)}catch(_){}
+ e.preventDefault();
+},{passive:false});
+C.addEventListener("pointerup",e=>{
+ if(!run||!gestureStart)return;
+ let dx=e.clientX-gestureStart.x,dy=e.clientY-gestureStart.y;
+ gestureStart=null;
+ if(Math.abs(dy)>=34 && Math.abs(dy)>Math.abs(dx)*.75){
+   if(dy<0){ jump(false); }       // swipe UP = jump
+   else { slide=Math.max(slide,130); } // swipe DOWN = long slide
+ }
+ e.preventDefault();
+},{passive:false});
+C.addEventListener("pointercancel",()=>{gestureStart=null});
 
 </script></body></html>
