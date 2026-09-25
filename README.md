@@ -24,3 +24,5 @@ Upload `index.html` over the existing GitHub `index.html` to update the Vercel d
 - Risk/reward coin trails, including rare gems.
 - Faster early-level spawn pacing.
 - Peyton remains the first selectable runner.
+
+- Main/default character: Peyton, a blonde-haired princess. 👸🏼

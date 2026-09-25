@@ -43,7 +43,7 @@ const W=[
  {name:'Volcano',icon:'🌋',sky:['#542437','#ff7043'],ground:'#51251f',mon:['🔥','👺','🐲'],boss:'🐉'},
  {name:'Monster Kingdom',icon:'🏰',sky:['#4527a0','#9c6ade'],ground:'#3d315b',mon:['👿','💀','🐲'],boss:'👑'}
 ];
-const chars=[['Blaze','🧑‍🚀'],['Nova','🥷'],['Rex','🦸'],['Luna','🧙'],['Bolt','🤖'],['Milo','🧝'],['Skye','🧚'],['Dash','🧑‍🎤'],['Rocky','🦹'],['Ace','🧑‍🚒']];
+const chars=[['Peyton','👸🏼'],['Nova','🥷'],['Rex','🦸'],['Luna','🧙'],['Bolt','🤖'],['Milo','🧝'],['Skye','🧚'],['Dash','🧑‍🎤'],['Rocky','🦹'],['Ace','🧑‍🚒']];
 const boosts={shield:{n:'Ghost Shield',i:'👻',d:'Invincible 10 sec',c:75},turbo:{n:'Turbo',i:'⚡',d:'Speed + score boost',c:60},magnet:{n:'Coin Magnet',i:'🧲',d:'Pull nearby coins',c:50},heart:{n:'Extra Heart',i:'❤️',d:'+1 life instantly',c:90}};
 let S=JSON.parse(localStorage.getItem('runbound3')||'null')||{bank:150,stars:0,unlocked:1,shield:0,turbo:0,magnet:0,heart:0,charUnlocked:3};
 function save(){localStorage.setItem('runbound3',JSON.stringify(S))}
