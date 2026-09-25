@@ -1,4 +1,5 @@
-# REBOUND v51
-Fixes the 25 3D background paths for the current GitHub layout.
-The game now loads level-01.jpg through level-25.jpg directly from the repository root.
-Double-length levels and Oaklie are retained.
+# REBOUND v52
+- Runner is kept visually anchored on the road, toward the left side, with a ground shadow for clarity.
+- Jump and slide still use the same road/collision plane.
+- Coin and obstacle spawn spacing is reduced, producing substantially more coins and hazards across the now double-length levels.
+- 25 root-level 3D backgrounds remain supported.
