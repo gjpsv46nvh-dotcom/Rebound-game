@@ -1,17 +1,9 @@
-# REBOUND v44 – Tap Controls + Full Themes + Long Landscape View
-Controls:
-- One tap = jump.
-- Double tap = slide.
-
-Worlds:
-- The theme renderer now fills the whole gameplay background with layered moving scenery.
-- Level 1 has an actual theme-park backdrop with a Ferris wheel and roller-coaster.
-- All 25 existing level themes still change level-by-level, with their own sky, ground, distant scenery and themed objects.
-
-Landscape:
-- Runner moves farther left in landscape.
-- Obstacles spawn substantially farther ahead.
-- Landscape canvas fills the available screen.
-- This creates roughly twice the usable forward course view so upcoming obstacles are much easier to see.
-
-All v43 clean-runner, shop, boots, scoring, coin rewards and winner celebration features are retained.
+# REBOUND v45 – Screen Tap Controls
+- Removed the on-screen up/down arrow controls completely.
+- The game screen itself is now the controller.
+- One tap anywhere on the gameplay screen = jump.
+- Double tap anywhere = slide.
+- Double tap cancels the first jump immediately so slide works reliably.
+- Jump and slide distances remain enlarged.
+- Full themed moving backgrounds and longer landscape obstacle view retained.
+- Clean runner, 25 levels, shop, boots, coins, scoring and winner celebration retained.
