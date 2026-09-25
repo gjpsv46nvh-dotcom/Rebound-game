@@ -24,7 +24,7 @@ h1{font-size:44px;margin:0}.tag{opacity:.72;margin:3px 0 14px}.section{margin-to
 <div id="bossHud">BOSS <div id="bossBar"><div id="bossFill"></div></div></div>
 <div class="bar" id="boostbar" style="display:none"></div><div class="toast" id="toast"></div>
 <div class="screen" id="menu"><div class="panel">
-<h1>RUNBOUND</h1><div class="tag">Run • Dodge • Collect • Upgrade • Reach the finish</div>
+<h1>RUNBOUND</h1><div class="tag">Pop-idol supernatural runners • Dodge • Collect • Reach the finish</div>
 <div>Bank: 🪙 <b id="bank"></b> &nbsp; | &nbsp; ⭐ <b id="stars"></b></div>
 <div class="section"><b>Choose Runner</b><div class="grid" id="chars"></div></div>
 <div class="section"><b>Worlds</b><div class="row" id="worlds"></div></div>
@@ -43,7 +43,10 @@ const W=[
  {name:'Volcano',icon:'🌋',sky:['#542437','#ff7043'],ground:'#51251f',mon:['🔥','👺','🐲'],boss:'🐉'},
  {name:'Monster Kingdom',icon:'🏰',sky:['#4527a0','#9c6ade'],ground:'#3d315b',mon:['👿','💀','🐲'],boss:'👑'}
 ];
-const chars=[['Peyton','👸🏼'],['Nova','🥷'],['Rex','🦸'],['Luna','🧙'],['Bolt','🤖'],['Milo','🧝'],['Skye','🧚'],['Dash','🧑‍🎤'],['Rocky','🦹'],['Ace','🧑‍🚒']];
+const chars=[
+['Peyton','👸🏼'],['Nova','🌙'],['Rex','🔥'],['Luna','✨'],['Bolt','⚡'],
+['Milo','❄️'],['Skye','💫'],['Dash','🎤'],['Rocky','🖤'],['Ace','☀️']
+];
 const boosts={shield:{n:'Ghost Shield',i:'👻',d:'Invincible 10 sec',c:75},turbo:{n:'Turbo',i:'⚡',d:'Speed + score boost',c:60},magnet:{n:'Coin Magnet',i:'🧲',d:'Pull nearby coins',c:50},heart:{n:'Extra Heart',i:'❤️',d:'+1 life instantly',c:90}};
 let S=JSON.parse(localStorage.getItem('runbound3')||'null')||{bank:150,stars:0,unlocked:1,shield:0,turbo:0,magnet:0,heart:0,charUnlocked:3};
 function save(){localStorage.setItem('runbound3',JSON.stringify(S))}
@@ -76,7 +79,7 @@ function planeIntro(){
  let px=Math.min(w*.68,80+intro*5); X.font='82px serif';X.fillText('✈️',px-90,h*.34);
  X.fillStyle='#17243a';X.font='900 22px system-ui';X.fillText('REBOUND',px-65,h*.34+10);
  X.font='800 22px system-ui';X.fillStyle='#17243a';X.fillText(`LEVEL ${level} • ${wo.name}`,30,50);
- if(intro>75){X.font='48px serif';X.fillText(chars[sel][1],px-10,h*.34+70+Math.min(150,(intro-75)*5))}
+ if(intro>75){drawHunter(px-10,h*.34+30+Math.min(150,(intro-75)*5),sel,intro*.18,.72)}
  if(intro<115)introRAF=requestAnimationFrame(planeIntro);else beginRun();
 }
 $('play').onclick=start;

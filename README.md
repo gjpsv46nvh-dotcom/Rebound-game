@@ -47,3 +47,12 @@ Upload `index.html` over the existing GitHub `index.html` to update the Vercel d
 - Chasing monsters do not appear until Level 4.
 - Early falling rocks and incoming enemies move more slowly.
 - Difficulty increases progressively after Level 5.
+
+## v9 original idol-hunter character redesign
+- Replaces the in-run emoji runner with original illustrated canvas characters.
+- Pop-idol / supernatural-hunter visual direction without copying any existing film characters.
+- Animated arms and legs while running.
+- Each of the 10 runners has distinct hair and outfit colours.
+- Magical energy-baton effects.
+- Peyton remains the main blonde princess and has her own gold tiara.
+- The selected illustrated character also appears in the REBOUND plane-drop intro.
