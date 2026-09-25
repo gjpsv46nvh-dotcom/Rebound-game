@@ -1,12 +1,10 @@
-# REBOUND v12 Clean Build
+# REBOUND v14 – Realistic Characters + Sound
 
-Fresh rebuild to remove accumulated legacy/boss code and fix mobile start issues.
-
-- Peyton is the default blonde princess.
-- 25 levels.
-- Slow difficulty ramp in levels 1–5.
-- REBOUND spaceship arrival and visible character drop.
-- Running/jumping/sliding.
-- Coins, rocks, monsters, falling hazards.
-- Finish line on every level.
-- No boss code.
+- More human-like character proportions, faces, hair, clothing, boots and running poses.
+- Peyton remains the blonde princess with tiara.
+- Collectibles are now clearly rendered gold coins.
+- Coin collection plays a short click/chime sound.
+- Collisions play a crash sound and remove one life.
+- Three lives per level with brief post-hit invulnerability.
+- HUD shows coin count and remaining lives.
+- Keeps v13's faster game pace.
