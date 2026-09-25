@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>REBOUND v19</title>
+<title>REBOUND v20</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:#08152b;color:#fff}
 canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
@@ -135,7 +135,7 @@ function lowObstacle(t){return ["hurdle","barrier","gate","goal","laser"].includ
 function gameDraw(){
  drawWorld();frame++;dist+=speed;if(invuln>0)invuln--;if(slide>0)slide--;
  lane+=(targetLane-lane)*.24;
- jumpV+=.55;jumpY+=jumpV;if(jumpY>0){jumpY=0;jumpV=0}
+ jumpV+=.62;jumpY+=jumpV;if(jumpY<-135){jumpY=-135;if(jumpV<0)jumpV=0}if(jumpY>0){jumpY=0;jumpV=0}
  let target=level===1?2400:2800+level*150;if(!finish&&dist>=target){finish=true;objects=[]}
  if(!finish&&frame%Math.max(48,82-Math.floor(level*.9))===0)spawn();
  for(let o of objects){o.z+=.0105+speed*.00045;drawObstacle(o)}
@@ -157,9 +157,23 @@ function gameDraw(){
 }
 function end(win){running=false;hud.style.display="none";if(win){save.unlocked=Math.max(save.unlocked,Math.min(25,level+1));persist();msg.textContent="🏁 LEVEL COMPLETE!";msg.style.display="block";setTimeout(()=>{msg.style.display="none";menu.style.display="flex";buildMenu()},900)}else{msg.textContent="Try again!";msg.style.display="block";setTimeout(()=>{msg.style.display="none";menu.style.display="flex"},800)}}
 function loop(){if(intro){frame++;introDraw()}else if(running)gameDraw();if(intro||running)requestAnimationFrame(loop)}
-function doJump(){if(!running)return;if(jumpY===0)jumpV=-13.8}
+function doJump(){if(!running)return;if(jumpY===0)jumpV=-11.6}
 C.addEventListener("pointerdown",e=>{audio();lastX=e.clientX;lastY=e.clientY});
-C.addEventListener("pointerup",e=>{if(!running)return;let dx=e.clientX-lastX,dy=e.clientY-lastY;if(Math.abs(dx)>38&&Math.abs(dx)>Math.abs(dy)){targetLane=Math.max(0,Math.min(2,targetLane+(dx>0?1:-1)))}else if(dy>42){slide=42}else{doJump()}});
+C.addEventListener("pointerup",e=>{
+ if(!running)return;
+ let dx=e.clientX-lastX,dy=e.clientY-lastY,ax=Math.abs(dx),ay=Math.abs(dy);
+ if(ax>32 && ax>ay*0.75){
+   targetLane=Math.max(0,Math.min(2,targetLane+(dx>0?1:-1)));
+   return;
+ }
+ if(dy>38 && ay>ax){
+   slide=42;
+   return;
+ }
+ if(ax<22 && ay<22){
+   doJump();
+ }
+});
 addEventListener("keydown",e=>{if(e.code==="ArrowLeft")targetLane=Math.max(0,targetLane-1);if(e.code==="ArrowRight")targetLane=Math.min(2,targetLane+1);if(e.code==="ArrowDown")slide=42;if(e.code==="Space"||e.code==="ArrowUp")doJump()});
 window.addEventListener("error",()=>{msg.textContent="Game error — reload page";msg.style.display="block"});
 </script>
