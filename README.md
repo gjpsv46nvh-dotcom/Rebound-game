@@ -16,7 +16,7 @@ Upload `index.html` over the existing GitHub `index.html` to update the Vercel d
 - First runner is now Peyton, a blonde-haired princess.
 
 ## v5 action update
-- Every level opens with a REBOUND aeroplane fly-in and character drop.
+- Every level opens with a REBOUND spaceship fly-in and character drop.
 - Moving platforms.
 - Falling rocks.
 - Monsters can chase the player from behind.
@@ -55,4 +55,11 @@ Upload `index.html` over the existing GitHub `index.html` to update the Vercel d
 - Each of the 10 runners has distinct hair and outfit colours.
 - Magical energy-baton effects.
 - Peyton remains the main blonde princess and has her own gold tiara.
-- The selected illustrated character also appears in the REBOUND plane-drop intro.
+- The selected illustrated character also appears in the REBOUND spaceship-drop intro.
+
+## v10 spaceship drop
+- Replaces the aeroplane with a REBOUND spaceship.
+- Spaceship descends from space and hovers above the level.
+- A glowing tractor beam appears.
+- The selected character visibly drops from the spaceship all the way to the ground before gameplay begins.
+- Gameplay starts only after the landing animation completes.

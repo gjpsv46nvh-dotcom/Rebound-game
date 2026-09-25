@@ -71,19 +71,43 @@ function start(){
 }
 function beginRun(){
  hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];platforms=[];hazards=[];collapse=[];chase=null;finishShown=false;
- speed=({1:2.65,2:2.9,3:3.2,4:3.5,5:3.8}[level] || Math.min(5.8,3.8+(level-5)*0.10));p.y=ground()-180;p.vy=2;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
+ speed=({1:2.65,2:2.9,3:3.2,4:3.5,5:3.8}[level] || Math.min(5.8,3.8+(level-5)*0.10));p.y=ground()-65;p.vy=0;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
 }
 function planeIntro(){
  intro++;
- let w=innerWidth,h=innerHeight,wo=W[worldFor(level)],gr=X.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#65bdf2');gr.addColorStop(1,'#e9f7ff');X.fillStyle=gr;X.fillRect(0,0,w,h);
- let px=Math.min(w*.68,80+intro*5); X.font='82px serif';X.fillText('✈️',px-90,h*.34);
- X.fillStyle='#17243a';X.font='900 22px system-ui';X.fillText('REBOUND',px-65,h*.34+10);
- X.font='800 22px system-ui';X.fillStyle='#17243a';X.fillText(`LEVEL ${level} • ${wo.name}`,30,50);
- if(intro>75){drawHunter(px-10,h*.34+30+Math.min(150,(intro-75)*5),sel,intro*.18,.72)}
- if(intro<115)introRAF=requestAnimationFrame(planeIntro);else beginRun();
-}
-$('play').onclick=start;
-function jump(high=false){if(!running)return;if(p.y>=ground()-66)p.vy=high?-18:-14}
+ let w=innerWidth,h=innerHeight,wo=W[worldFor(level)];
+ let gr=X.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#07152f');gr.addColorStop(.55,'#173e72');gr.addColorStop(1,'#a9d7ef');
+ X.fillStyle=gr;X.fillRect(0,0,w,h);
+ // stars
+ X.fillStyle='#fff';
+ for(let k=0;k<45;k++){let sx=(k*83+intro*.35)%w,sy=(k*47)%Math.max(120,h*.58);X.globalAlpha=.35+(k%4)*.15;X.fillRect(sx,sy,2,2)}
+ X.globalAlpha=1;
+ X.fillStyle='#fff';X.font='900 22px system-ui';X.fillText(`LEVEL ${level} • ${wo.name}`,26,46);
+
+ // spaceship descends and hovers
+ let shipY=Math.min(h*.24, -90+intro*4.0);
+ let shipX=w*.5;
+ X.save();X.translate(shipX,shipY);
+ X.fillStyle='#dfe8f4';X.beginPath();X.ellipse(0,0,105,34,0,0,Math.PI*2);X.fill();
+ X.fillStyle='#6ad5ff';X.beginPath();X.ellipse(0,-20,54,28,0,Math.PI,Math.PI*2);X.fill();
+ X.fillStyle='#17243a';X.font='900 18px system-ui';X.textAlign='center';X.fillText('REBOUND',0,7);
+ X.fillStyle='#8df3ff';X.fillRect(-82,24,30,7);X.fillRect(52,24,30,7);
+ X.restore();
+
+ // tractor beam and actual character drop
+ if(intro>58){
+   let t=Math.min(1,(intro-58)/68);
+   let dropY=shipY+35 + (ground()-85-(shipY+35))*(t*t);
+   X.save();
+   let beam=X.createLinearGradient(shipX,shipY+25,shipX,dropY+75);
+   beam.addColorStop(0,'rgba(120,235,255,.55)');beam.addColorStop(1,'rgba(120,235,255,.05)');
+   X.fillStyle=beam;X.beginPath();X.moveTo(shipX-35,shipY+24);X.lineTo(shipX-68,dropY+82);X.lineTo(shipX+68,dropY+82);X.lineTo(shipX+35,shipY+24);X.closePath();X.fill();
+   X.restore();
+   drawHunter(shipX-22,dropY,sel,intro*.2,.82);
+ }
+ if(intro<130)introRAF=requestAnimationFrame(planeIntro);
+ else beginRun();
+}function jump(high=false){if(!running)return;if(p.y>=ground()-66)p.vy=high?-18:-14}
 C.addEventListener('pointerdown',e=>{sy=e.clientY;let n=Date.now();jump(n-lastTap<280);lastTap=n});C.addEventListener('pointerup',e=>{if(e.clientY-sy>45)p.slide=35});
 addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')jump(false);if(e.code==='ArrowDown')p.slide=35;if(e.code==='KeyX')attack()});
 function spawn(){
