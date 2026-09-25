@@ -1,9 +1,12 @@
-# REBOUND v33 – iPhone Home Screen Start Fix
-- Fixed Start Adventure for iPhone Home Screen / standalone mode.
-- Removed the browser orientation-lock call from the Start button.
-- Start now uses explicit DOM element references instead of browser-created ID globals.
-- Start button is forced above overlays and remains tappable in landscape.
-- Manifest start URL is versioned to v33.
-- Landscape fit, themed levels, transparent runner, rewards, coins and lives retained.
+# REBOUND v34 – iPhone Start Adventure Fix
+This version fixes the Home Screen Start Adventure issue at the touch layer.
 
-After deploying v33, delete the OLD REBOUND Home Screen icon, open the live site in Safari, refresh it, then Share > Add to Home Screen again.
+Key fixes:
+- The rotate-to-landscape overlay can no longer intercept taps.
+- Portrait mode is no longer blocked by a full-screen rotate layer.
+- Start Adventure responds to click, pointer-up and touch-end.
+- Start screen and level controls are forced above the canvas.
+- Removed manifest orientation restriction during iPhone Home Screen launch.
+- Landscape still works and the game resizes when rotated.
+
+After deployment, test the live website in Safari first. Then remove the old Home Screen icon and add the site again.
