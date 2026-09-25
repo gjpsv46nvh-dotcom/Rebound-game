@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v62</title><style>
+<title>REBOUND v63</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -186,11 +186,11 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 </div></div>
 <div id="rotateHint"><div>📱↻<br>ROTATE TO LANDSCAPE<small>Turn your phone sideways for the longer REBOUND course view.</small></div></div>
 <script>
-// REBOUND v62: continuous 3D gameplay road + v53 gameplay fixes
+// REBOUND v63: continuous 3D gameplay road + v53 gameplay fixes
 
 
 const levelBgImgs=Array.from({length:25},(_,i)=>{
- const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=62`; return im;
+ const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=63`; return im;
 });
 function drawLevelBackgroundImage(){
  const im=levelBgImgs[(level-1)%25];
@@ -210,7 +210,7 @@ function drawLevelBackgroundImage(){
 
 
 const oaklieImg=new Image();
-oaklieImg.src="./oaklie.png?v=62";
+oaklieImg.src="./oaklie.png?v=63";
 oaklieImg.onerror=()=>console.warn("Oaklie sprite failed to load");
 
 const startEl=document.getElementById("start");
@@ -218,7 +218,7 @@ const hudEl=document.getElementById("hud");
 const controlsEl={style:{display:"none"}};
 const msgEl=document.getElementById("msg");
 
-const C=document.getElementById("c"),X=C.getContext("2d"),scene=new Image(),runner=new Image();scene.src="level-01.jpg?v=62";runner.src="runner.png?v=62";
+const C=document.getElementById("c"),X=C.getContext("2d"),scene=new Image(),runner=new Image();scene.src="level-01.jpg?v=63";runner.src="runner.png?v=63";
 let W,H,dpr,run=false,frame=0,dist=0,speed=6.12,jy=0,jv=0,slide=0,lives=3,coins=0,obs=[],inv=0,level=1,hits=0,startCoins=0;
 let save={unlocked:1,bank:0};try{save=JSON.parse(localStorage.getItem("rebound27"))||save}catch(e){}
 function saveIt(){localStorage.setItem("rebound27",JSON.stringify(save))}
@@ -413,7 +413,7 @@ function laneTargetX(){
 }
 const LEVEL_ART=Array.from({length:25},(_,i)=>{
   const im=new Image();
-  im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=62`;
+  im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=63`;
   return im;
 });
 function drawLevelWorld(){
@@ -513,30 +513,36 @@ function drawPerspectiveObject(o){
 function spawnCoinTrail(){const ln=Math.floor(Math.random()*3);for(let i=0;i<5;i++)obs.push({z:-i*.11,lane:ln,t:"coin"})}
 function spawn(){const ln=Math.floor(Math.random()*3),r=Math.random();obs.push({z:0,lane:ln,t:r<.48?"coin":(r<.72?"ramp":"barrier")})}
 function drawRunner(){
-  const x=laneTargetX(),base=H*.80+jy,bob=Math.abs(Math.sin(frame*.35))*3;
-  const selected=(save.runner==="oaklie"||save.runner==="nova")?"oaklie":"peyton";
-  const img=selected==="oaklie"?OAK:RUN;
-  const rw=Math.max(72,Math.min(128,W*.105));
-  const ratio=(img&&img.complete&&img.naturalWidth&&img.naturalHeight)?img.naturalHeight/img.naturalWidth:1.55;
-  const rh=rw*Math.min(1.75,Math.max(1.35,ratio));
-  const stride=Math.sin(frame*.35)*3;
+ const x=laneTargetX(),base=H*.80+jy,bob=Math.abs(Math.sin(frame*.35))*3;
+ X.save();
+ X.fillStyle="rgba(0,0,0,.32)";X.beginPath();X.ellipse(x,base+5,38,9,0,0,Math.PI*2);X.fill();
+ X.restore();
 
-  X.save();
-  X.translate(x,base+bob);
-  X.fillStyle="rgba(0,0,0,.32)";
-  X.beginPath();X.ellipse(0,5,rw*.30,rw*.075,0,0,Math.PI*2);X.fill();
-
-  // Selected custom character: Peyton (runner.png) or Oaklie (oaklie.png).
-  if(img&&img.complete&&img.naturalWidth){
-    // Small running sway/leg-motion effect while keeping the original custom artwork.
-    X.translate(stride,0);
-    X.rotate(Math.sin(frame*.35)*.012);
-    X.drawImage(img,-rw/2,-rh,rw,rh);
-  }else{
-    X.fillStyle="#111820";X.fillRect(-rw*.22,-rh*.72,rw*.44,rh*.55);
-    X.fillStyle="#d7a27f";X.beginPath();X.arc(0,-rh*.86,rw*.18,0,Math.PI*2);X.fill();
-  }
-  X.restore();
+ // Use the image objects that already exist in the working game:
+ // runner = Peyton, oaklieImg = Oaklie.
+ if(save.runner==="oaklie" || save.runner==="nova"){
+   drawOaklieRunner(x,base,0.62);
+   return;
+ }
+ if(save.runner==="custom" && customRunnerData){
+   drawCustomFaceBadge();
+ }
+ if(runner.complete && runner.naturalWidth){
+   const rw=Math.max(76,Math.min(132,W*.108));
+   const ratio=runner.naturalHeight/runner.naturalWidth;
+   const rh=rw*Math.min(1.75,Math.max(1.35,ratio));
+   X.save();
+   X.translate(x,base+bob);
+   X.rotate(Math.sin(frame*.35)*.012);
+   X.drawImage(runner,-rw/2,-rh,rw,rh);
+   X.restore();
+   return;
+ }
+ // Safe fallback so a slow image load never stops gameplay.
+ X.save();X.translate(x,base);
+ X.fillStyle="#111820";X.fillRect(-24,-105,48,65);
+ X.fillStyle="#d7a27f";X.beginPath();X.arc(0,-124,18,0,Math.PI*2);X.fill();
+ X.restore();
 }
 function doJump(){if(run&&jy===0&&slide===0)jv=-16.5} function doSlide(){if(run&&jy===0)slide=110}
 function startGame(e){
