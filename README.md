@@ -1,6 +1,6 @@
-# REBOUND v26 – Large approved runner
-- New approved Peyton runner with visible head, hair, arms and real running legs.
-- Main character is approximately twice the previous on-screen size and moved farther into the screen.
-- Static Peyton image is covered/removed from the gameplay background so there is only one live runner.
-- Bright enhanced 3D-style theme park visual retained.
-- Side-scrolling gameplay, coins, barriers, ramps, jump, slide and 3 lives retained.
+# REBOUND v27
+- Fixed runner extraction to retain the complete head, hair, face, body and legs.
+- Restored the kid-friendly REBOUND start screen.
+- 25-level selector with locked/unlocked progression.
+- Rewards/coin bank restored: collected coins are banked after completing a level.
+- Large side-scrolling runner, jump/slide, 3 lives, coins, ramps and barriers.
