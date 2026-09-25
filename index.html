@@ -59,27 +59,66 @@ function render(){
 }
 render();
 let running=false,frame=0,dist=0,runCoins=0,lives=3,objs=[],shots=[],speed=6,p={x:110,y:0,vy:0,slide:0},active={shield:0,turbo:0,magnet:0},boss=null,lastTap=0,sy=0;
+let intro=0, introRAF=0, platforms=[], hazards=[], collapse=[], chase=null;
 const ground=()=>innerHeight-105;
 function boostUI(){boostbar.innerHTML='';for(let [k,v] of Object.entries(boosts)){let b=document.createElement('button');b.textContent=`${v.i} ${S[k]}`;b.disabled=!S[k];b.onclick=()=>{if(!S[k])return;S[k]--;if(k==='heart')lives++;else active[k]=600;save();boostUI()};boostbar.appendChild(b)}if(boss){let a=document.createElement('button');a.textContent='💥 ATTACK';a.onclick=attack;boostbar.appendChild(a)}}
-function start(){menu.style.display='none';hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];speed=6+level*.12;p.y=ground()-65;p.vy=0;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)}
+function start(){
+ menu.style.display='none';hud.style.display='none';boostbar.style.display='none';intro=0;running=false;
+ planeIntro();
+}
+function beginRun(){
+ hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];platforms=[];hazards=[];collapse=[];chase=null;
+ speed=6+level*.12;p.y=ground()-180;p.vy=2;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
+}
+function planeIntro(){
+ intro++;
+ let w=innerWidth,h=innerHeight,wo=W[worldFor(level)],gr=X.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#65bdf2');gr.addColorStop(1,'#e9f7ff');X.fillStyle=gr;X.fillRect(0,0,w,h);
+ let px=Math.min(w*.68,80+intro*5); X.font='82px serif';X.fillText('✈️',px-90,h*.34);
+ X.fillStyle='#17243a';X.font='900 22px system-ui';X.fillText('REBOUND',px-65,h*.34+10);
+ X.font='800 22px system-ui';X.fillStyle='#17243a';X.fillText(`LEVEL ${level} • ${wo.name}`,30,50);
+ if(intro>75){X.font='48px serif';X.fillText(chars[sel][1],px-10,h*.34+70+Math.min(150,(intro-75)*5))}
+ if(intro<115)introRAF=requestAnimationFrame(planeIntro);else beginRun();
+}
 $('play').onclick=start;
 function jump(high=false){if(!running)return;if(p.y>=ground()-66)p.vy=high?-18:-14}
 C.addEventListener('pointerdown',e=>{sy=e.clientY;let n=Date.now();jump(n-lastTap<280);lastTap=n});C.addEventListener('pointerup',e=>{if(e.clientY-sy>45)p.slide=35});
 addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')jump(false);if(e.code==='ArrowDown')p.slide=35;if(e.code==='KeyX')attack()});
-function spawn(){let w=W[worldFor(level)],r=Math.random(),g=ground();if(r<.45)objs.push({t:'monster',x:innerWidth+50,y:g-52,w:50,h:50,e:w.mon[Math.floor(Math.random()*w.mon.length)]});else if(r<.82){let rare=Math.random()<.08;objs.push({t:'coin',x:innerWidth+50,y:g-100-Math.random()*110,w:30,h:30,e:rare?'💎':'🪙',val:rare?10:1})}else objs.push({t:'rock',x:innerWidth+50,y:g-40,w:45,h:40,e:'🪨'})}
+function spawn(){
+ let wld=W[worldFor(level)],r=Math.random(),g=ground();
+ if(r<.30)objs.push({t:'monster',x:innerWidth+50,y:g-52,w:50,h:50,e:wld.mon[Math.floor(Math.random()*wld.mon.length)],vx:1.5+level*.08});
+ else if(r<.48){ // dangerous coin trail
+   let high=Math.random()<.5; for(let j=0;j<6;j++)objs.push({t:'coin',x:innerWidth+50+j*48,y:g-(high?150+j%2*35:75),w:30,h:30,e:j==5?'💎':'🪙',val:j==5?10:1});
+   if(high) hazards.push({t:'fallrock',x:innerWidth+190,y:-60,w:48,h:48,vy:2.5,e:'🪨'});
+ }
+ else if(r<.61)objs.push({t:'incoming',x:innerWidth+60,y:g-75-Math.random()*80,w:48,h:48,e:'🦇',vx:3.5+level*.15});
+ else if(r<.73)hazards.push({t:'fallrock',x:innerWidth*.55+Math.random()*innerWidth*.35,y:-70,w:52,h:52,vy:3+level*.08,e:'🪨'});
+ else if(r<.84){platforms.push({x:innerWidth+40,y:g-120-Math.random()*70,w:150,h:20,vy:(Math.random()<.5?-1:1)*.7});}
+ else if(r<.93){collapse.push({x:innerWidth+30,y:g,w:180,h:25,timer:150});}
+ else objs.push({t:'rock',x:innerWidth+50,y:g-40,w:45,h:40,e:'🪨'});
+ if(level>=2 && Math.random()<.18 && !chase) chase={x:-90,y:g-62,w:60,h:60,e:'👹',life:360};
+}
 function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
 function attack(){if(!boss||!running)return;shots.push({x:p.x+45,y:p.y+22,w:22,h:12});}
 function beginBoss(){let w=W[worldFor(level)];boss={x:innerWidth-150,y:ground()-120,w:100,h:110,hp:8+worldFor(level)*4,max:8+worldFor(level)*4,e:w.boss,cool:0};$('bossHud').style.display='block';boostUI();showToast('BOSS FIGHT! Tap ATTACK')}
 function end(win){running=false;let reward=0,stars=0;if(win){reward=100+level*20+(level%5==0?150:0);stars=level%5==0?3:1;S.bank+=reward+runCoins;S.stars+=stars;if(level==S.unlocked&&S.unlocked<25)S.unlocked++;save()}else{S.bank+=runCoins;save()}setTimeout(()=>{menu.style.display='flex';hud.style.display='none';boostbar.style.display='none';$('bossHud').style.display='none';document.querySelector('.tag').textContent=win?`Level ${level} complete! +${reward+runCoins} coins • +${stars} ⭐`:`Level ${level} failed — collected ${runCoins} coins saved.`;if(win&&level<S.unlocked)level++;render()},500)}
 function loop(){
- if(!running)return;frame++;let mult=active.turbo?1.5:1;let target=4300+level*250; if(!boss)dist+=speed*mult;
- if(!boss&&frame%Math.max(58,105-level)===0)spawn();
+ if(!running)return;frame++;let mult=active.turbo?1.5:1;let target=level<=3?3300+level*250:4300+level*250; if(!boss)dist+=speed*mult;
+ if(!boss&&frame%Math.max(38,72-level*2)===0)spawn();
+ if(!boss && level>=2 && frame%145===0){objs.push({t:'flyer',x:innerWidth+80,y:ground()-145-Math.random()*55,w:48,h:48,e:'🦇',vx:4});}
+ if(!boss && level>=3 && frame%190===0){objs.push({t:'roller',x:innerWidth+80,y:ground()-35,w:42,h:35,e:'🪵',vx:7});}
+ if(!boss && frame%(level<3?115:85)===0){let g=ground(),wld=W[worldFor(level)];objs.push({t:'charger',x:innerWidth+70,y:g-(Math.random()<.45?125:52),w:50,h:50,e:wld.mon[Math.floor(Math.random()*wld.mon.length)],vx:level<3?3.5:5+level*.15});}
  p.vy+=.72;p.y+=p.vy;if(p.y>ground()-65){p.y=ground()-65;p.vy=0}if(p.slide)p.slide--;
  for(let k in active)if(active[k]>0)active[k]--;
- for(let o of objs){o.x-=speed*mult;if(active.magnet&&o.t==='coin'&&o.x<innerWidth*.75){o.x+=(p.x-o.x)*.045;o.y+=(p.y-o.y)*.045}}
+ for(let o of objs){o.x-=speed*mult+(o.vx||0);if(active.magnet&&o.t==='coin'&&o.x<innerWidth*.75){o.x+=(p.x-o.x)*.045;o.y+=(p.y-o.y)*.045}}
  let ph={x:p.x+8,y:p.y+(p.slide?31:5),w:42,h:p.slide?30:55};
  for(let o of objs){if(o.dead)continue;if(overlap(ph,o)){if(o.t==='coin'){runCoins+=o.val;o.dead=true}else if(!active.shield){lives--;o.dead=true;if(lives<=0){end(false);return}}}}
- objs=objs.filter(o=>o.x>-80&&!o.dead);
+ for(let q of hazards){if(overlap(ph,q)&&!active.shield){lives--;q.dead=true;if(lives<=0){end(false);return}}}
+ if(chase&&overlap(ph,chase)&&!active.shield){lives--;chase=null;if(lives<=0){end(false);return}}
+ // Moving platforms can catch the player while falling.
+ for(let q of platforms){if(p.vy>=0 && p.x+45>q.x && p.x<q.x+q.w && p.y+65>=q.y && p.y+65<=q.y+18){p.y=q.y-65;p.vy=0}}
+ // Collapsing ground creates a danger zone once its timer expires.
+ for(let q of collapse){if(q.timer<70 && p.x+35>q.x && p.x<q.x+q.w && p.y>=ground()-70 && !active.shield){lives--;q.dead=true;p.vy=-10;if(lives<=0){end(false);return}}}
+ objs=objs.filter(o=>o.x>-80&&!o.dead);platforms=platforms.filter(q=>q.x+q.w>-60);hazards=hazards.filter(q=>q.y<innerHeight+80&&!q.dead);collapse=collapse.filter(q=>q.x+q.w>-60&&!q.dead);
  if(level%5===0&&!boss&&dist>=target){objs=[];beginBoss()}
  if(level%5!==0&&dist>=target){end(true);return}
  if(boss){boss.cool--;if(boss.cool<=0){boss.cool=90-Math.min(35,worldFor(level)*7);objs.push({t:'bossShot',x:boss.x,y:boss.y+45,w:38,h:28,e:'🔥'})}for(let s of shots)s.x+=11;for(let s of shots){if(!s.dead&&overlap(s,boss)){s.dead=true;boss.hp--;if(boss.hp<=0){end(true);return}}}shots=shots.filter(s=>s.x<innerWidth+40&&!s.dead);$('bossFill').style.width=(boss.hp/boss.max*100)+'%'}
@@ -90,7 +129,23 @@ function draw(target){
  X.globalAlpha=.35;X.font='70px serif';for(let i=0;i<8;i++)X.fillText(wo.icon,((i*180-dist*.12)%(w+250))-80,g-35-(i%2)*50);X.globalAlpha=1;
  X.fillStyle=wo.ground;X.fillRect(0,g,w,h-g);X.font='42px serif';for(let o of objs)X.fillText(o.e,o.x,o.y+o.h);
  if(boss){X.font='90px serif';X.fillText(boss.e,boss.x,boss.y+90);X.font='25px serif';for(let s of shots)X.fillText('✨',s.x,s.y+18)}
- X.globalAlpha=active.shield?.55:1;X.font=p.slide?'40px serif':'54px serif';X.fillText(chars[sel][1],p.x,p.y+55);X.globalAlpha=1;
+ for(let q of platforms){X.fillStyle='#6b4b2a';X.fillRect(q.x,q.y,q.w,q.h);X.fillStyle='#9d7443';X.fillRect(q.x,q.y,q.w,6)}
+ for(let q of hazards){X.font='44px serif';X.fillText(q.e,q.x,q.y+q.h)}
+ for(let q of collapse){if(q.timer<110){X.strokeStyle='#2a1710';X.lineWidth=5;X.beginPath();X.moveTo(q.x,q.y+4);X.lineTo(q.x+45,q.y+18);X.lineTo(q.x+90,q.y+3);X.lineTo(q.x+135,q.y+19);X.stroke()}}
+ if(chase){X.font='54px serif';X.fillText(chase.e,chase.x,chase.y+55)}
+ X.globalAlpha=active.shield?.55:1;
+ // Animated runner with visible moving legs/arms. Character emoji becomes the runner's head/identity.
+ const rx=p.x+28, ry=p.y+18, phase=frame*.28*(active.turbo?1.6:1), swing=Math.sin(phase)*14;
+ X.lineWidth=7; X.lineCap='round'; X.strokeStyle='#172033';
+ if(p.slide){
+   X.beginPath();X.moveTo(rx-5,ry+25);X.lineTo(rx+23,ry+38);X.stroke();
+   X.beginPath();X.moveTo(rx+8,ry+35);X.lineTo(rx+31,ry+48);X.moveTo(rx+8,ry+35);X.lineTo(rx-18,ry+45);X.stroke();
+ }else{
+   X.beginPath();X.moveTo(rx,ry+20);X.lineTo(rx,ry+43);X.stroke();
+   X.beginPath();X.moveTo(rx,ry+27);X.lineTo(rx+Math.sin(phase+Math.PI)*15,ry+39);X.moveTo(rx,ry+27);X.lineTo(rx+Math.sin(phase)*15,ry+39);X.stroke();
+   X.beginPath();X.moveTo(rx,ry+43);X.lineTo(rx+swing,ry+63);X.moveTo(rx,ry+43);X.lineTo(rx-swing,ry+63);X.stroke();
+ }
+ X.font='35px serif';X.fillText(chars[sel][1],rx-18,ry+15);X.globalAlpha=1;
  let pct=boss?100:Math.min(100,Math.floor(dist/target*100));hud.textContent=`${wo.icon} LEVEL ${level} • ${pct}% • 🪙 ${S.bank}+${runCoins} • ❤️ ${lives}`+(active.shield?' • 👻':'')+(active.turbo?' • ⚡':'')+(active.magnet?' • 🧲':'')
 }
 draw(1);

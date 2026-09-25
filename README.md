@@ -1,26 +1,26 @@
-# RUNBOUND v3
+# RUNBOUND v4
 
-A mobile-first browser game prototype.
+Changes based on playtesting:
+- All 10 runners now have visible animated bodies, arms and running legs.
+- Early levels have substantially more action and shorter pacing.
+- Enemies can charge toward the player instead of only scrolling with the scenery.
+- Level 2 introduces airborne enemies moving toward the player.
+- Level 3 introduces fast rolling obstacles.
+- Later levels increase incoming enemy speed and density.
+- Existing 25-level / 5-world progression, coins, stars, boosts, bosses and saved progress remain.
 
-## New in v3
-- 5 themed worlds / 25 total levels
-  1. Greenlands
-  2. Dark Forest
-  3. Ice Caves
-  4. Volcano
-  5. Monster Kingdom
-- Boss fight every 5th level
-- Boss attack button
-- 10 selectable characters
-- First 3 characters unlocked; remaining characters can be unlocked with stars
-- Persistent coins, stars, unlocked levels, characters and boost inventory via localStorage
-- Standard coins plus rare gems worth 10 coins
-- Level rewards and larger boss-level rewards
-- Ghost Shield, Turbo, Coin Magnet and Extra Heart boosts
-- Different enemies/backgrounds for each world
-- Touch controls for iPhone plus keyboard controls
+Upload `index.html` over the existing GitHub `index.html` to update the Vercel deployment.
 
-## Run
-Open `index.html` in a browser, or deploy the folder to Vercel / GitHub Pages.
 
-This is still a prototype: the next production pass should replace emoji art with original sprite artwork, add sound/music, animation frames, accounts/cloud saves and online leaderboards.
+## Character update
+- First runner is now Peyton, a blonde-haired princess.
+
+## v5 action update
+- Every level opens with a REBOUND aeroplane fly-in and character drop.
+- Moving platforms.
+- Falling rocks.
+- Monsters can chase the player from behind.
+- Collapsing-ground danger zones.
+- Risk/reward coin trails, including rare gems.
+- Faster early-level spawn pacing.
+- Peyton remains the first selectable runner.
