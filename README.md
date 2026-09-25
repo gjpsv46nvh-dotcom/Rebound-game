@@ -1,9 +1,7 @@
-# REBOUND v45 – Screen Tap Controls
-- Removed the on-screen up/down arrow controls completely.
-- The game screen itself is now the controller.
-- One tap anywhere on the gameplay screen = jump.
-- Double tap anywhere = slide.
-- Double tap cancels the first jump immediately so slide works reliably.
-- Jump and slide distances remain enlarged.
-- Full themed moving backgrounds and longer landscape obstacle view retained.
-- Clean runner, 25 levels, shop, boots, coins, scoring and winner celebration retained.
+# REBOUND v46 – Oaklie + Enhanced Worlds
+- Oaklie is now the second selectable runner.
+- Oaklie uses the approved cropped character art and animated running legs.
+- Screen controls remain: single tap jump, double tap slide.
+- All 25 levels have denser, full-screen moving themed scenery.
+- Level 1 has theme-park scenery; every following level uses its own matching world theme.
+- Long landscape forward view is retained.
