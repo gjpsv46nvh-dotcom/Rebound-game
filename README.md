@@ -1,6 +1,6 @@
-# REBOUND v25 – Generated-photo visual build
-This build uses the approved generated theme-park artwork as the game's visual basis and the approved running pose as the runner asset.
-- Peyton is positioned farther into the screen.
-- Side-scrolling left-to-right gameplay.
-- Tap/JUMP to jump; downward swipe/SLIDE to slide.
-- 3 lives, collectible gold coins, barriers and ramps.
+# REBOUND v26 – Large approved runner
+- New approved Peyton runner with visible head, hair, arms and real running legs.
+- Main character is approximately twice the previous on-screen size and moved farther into the screen.
+- Static Peyton image is covered/removed from the gameplay background so there is only one live runner.
+- Bright enhanced 3D-style theme park visual retained.
+- Side-scrolling gameplay, coins, barriers, ramps, jump, slide and 3 lives retained.
