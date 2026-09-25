@@ -63,3 +63,9 @@ Upload `index.html` over the existing GitHub `index.html` to update the Vercel d
 - A glowing tractor beam appears.
 - The selected character visibly drops from the spaceship all the way to the ground before gameplay begins.
 - Gameplay starts only after the landing animation completes.
+
+## v11 critical fix
+- Fixed missing drawHunter function that caused the spaceship intro to stop before gameplay.
+- Character now visibly drops from the REBOUND spaceship and the run begins after landing.
+- Illustrated Peyton/runner now renders during gameplay.
+- First five levels have fewer simultaneous hazard spawns and a gentler difficulty curve.

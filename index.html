@@ -73,6 +73,38 @@ function beginRun(){
  hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];platforms=[];hazards=[];collapse=[];chase=null;finishShown=false;
  speed=({1:2.65,2:2.9,3:3.2,4:3.5,5:3.8}[level] || Math.min(5.8,3.8+(level-5)*0.10));p.y=ground()-65;p.vy=0;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
 }
+
+function drawHunter(x,y,i,phase=0,scale=.82){
+ const hair=['#f4d06f','#30203c','#c43b48','#7754a8','#222b3a','#d7edf6','#e676ae','#31aabd','#171820','#dc7138'];
+ const outfit=['#d64fa5','#6650c8','#bd3044','#8a65c5','#3266ad','#78a6c4','#dc629f','#2f9eb1','#3b3b4a','#df833f'];
+ X.save(); X.translate(x,y); X.scale(scale,scale);
+ let swing=Math.sin(phase)*13;
+ // aura
+ X.globalAlpha=.18; X.fillStyle=outfit[i]||outfit[0]; X.beginPath(); X.arc(25,37,38,0,Math.PI*2); X.fill(); X.globalAlpha=1;
+ // legs
+ X.strokeStyle='#1d2230'; X.lineWidth=7; X.lineCap='round';
+ X.beginPath(); X.moveTo(19,51); X.lineTo(14-swing*.45,69); X.lineTo(5-swing*.7,84); X.stroke();
+ X.beginPath(); X.moveTo(30,51); X.lineTo(35+swing*.45,69); X.lineTo(44+swing*.7,84); X.stroke();
+ // body
+ X.fillStyle=outfit[i]||outfit[0]; X.beginPath();
+ if(X.roundRect){X.roundRect(10,25,29,32,8)}else{X.rect(10,25,29,32)}
+ X.fill(); X.fillStyle='#171a24'; X.fillRect(11,49,27,7);
+ // arms
+ X.strokeStyle=outfit[i]||outfit[0]; X.lineWidth=7;
+ X.beginPath(); X.moveTo(12,32); X.lineTo(2+swing*.4,48); X.stroke();
+ X.beginPath(); X.moveTo(37,32); X.lineTo(47-swing*.4,46); X.stroke();
+ // face + hair
+ X.fillStyle='#f1c6a5'; X.beginPath(); X.arc(24,16,13,0,Math.PI*2); X.fill();
+ X.fillStyle=hair[i]||hair[0]; X.beginPath(); X.arc(24,12,14,Math.PI,Math.PI*2); X.fill();
+ X.fillRect(10,10,5,20); X.fillRect(33,10,5,20);
+ // Peyton tiara
+ if(i===0){X.fillStyle='#ffd84d';X.beginPath();X.moveTo(14,2);X.lineTo(18,-7);X.lineTo(23,0);X.lineTo(29,-8);X.lineTo(34,2);X.closePath();X.fill()}
+ // energy wand
+ X.strokeStyle='#fff'; X.lineWidth=3; X.beginPath(); X.moveTo(45,44); X.lineTo(56,28); X.stroke();
+ X.fillStyle=outfit[i]||outfit[0]; X.beginPath(); X.arc(57,26,5,0,Math.PI*2); X.fill();
+ X.restore();
+}
+
 function planeIntro(){
  intro++;
  let w=innerWidth,h=innerHeight,wo=W[worldFor(level)];
@@ -109,7 +141,7 @@ function planeIntro(){
  else beginRun();
 }function jump(high=false){if(!running)return;if(p.y>=ground()-66)p.vy=high?-18:-14}
 C.addEventListener('pointerdown',e=>{sy=e.clientY;let n=Date.now();jump(n-lastTap<280);lastTap=n});C.addEventListener('pointerup',e=>{if(e.clientY-sy>45)p.slide=35});
-addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')jump(false);if(e.code==='ArrowDown')p.slide=35;if(e.code==='KeyX')attack()});
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')jump(false);if(e.code==='ArrowDown')p.slide=35;});
 function spawn(){
  let wld=W[worldFor(level)],r=Math.random(),g=ground();
  if(r<.30)objs.push({t:'monster',x:innerWidth+50,y:g-52,w:50,h:50,e:wld.mon[Math.floor(Math.random()*wld.mon.length)],vx:1.5+level*.08});
@@ -130,10 +162,10 @@ function beginBoss(){let w=W[worldFor(level)];boss={x:innerWidth-150,y:ground()-
 function end(win){running=false;let reward=0,stars=0;if(win){reward=100+level*20;stars=1;S.bank+=reward+runCoins;S.stars+=stars;if(level==S.unlocked&&S.unlocked<25)S.unlocked++;save()}else{S.bank+=runCoins;save()}setTimeout(()=>{menu.style.display='flex';hud.style.display='none';boostbar.style.display='none';$('bossHud').style.display='none';document.querySelector('.tag').textContent=win?`Level ${level} complete! +${reward+runCoins} coins • +${stars} ⭐`:`Level ${level} failed — collected ${runCoins} coins saved.`;if(win&&level<S.unlocked)level++;render()},500)}
 function loop(){
  if(!running)return;frame++;let mult=active.turbo?1.5:1;let target=level<=3?3300+level*250:4300+level*250; if(!boss)dist+=speed*mult;
- if(!boss&&frame%Math.max(38,72-level*2)===0)spawn();
- if(!boss && level>=2 && frame%145===0){objs.push({t:'flyer',x:innerWidth+80,y:ground()-145-Math.random()*55,w:48,h:48,e:'🦇',vx:4});}
- if(!boss && level>=3 && frame%190===0){objs.push({t:'roller',x:innerWidth+80,y:ground()-35,w:42,h:35,e:'🪵',vx:7});}
- if(!boss && frame%(level<3?115:85)===0){let g=ground(),wld=W[worldFor(level)];objs.push({t:'charger',x:innerWidth+70,y:g-(Math.random()<.45?125:52),w:50,h:50,e:wld.mon[Math.floor(Math.random()*wld.mon.length)],vx:level<3?3.5:5+level*.15});}
+ if(!boss&&frame%({1:150,2:135,3:120,4:108,5:98}[level]||Math.max(68,105-level))===0)spawn();
+ if(!boss && level>=3 && frame%210===0){objs.push({t:'flyer',x:innerWidth+80,y:ground()-145-Math.random()*55,w:48,h:48,e:'🦇',vx:4});}
+ if(!boss && level>=4 && frame%230===0){objs.push({t:'roller',x:innerWidth+80,y:ground()-35,w:42,h:35,e:'🪵',vx:7});}
+ if(!boss && level>=3 && frame%(level<5?180:120)===0){let g=ground(),wld=W[worldFor(level)];objs.push({t:'charger',x:innerWidth+70,y:g-(Math.random()<.45?125:52),w:50,h:50,e:wld.mon[Math.floor(Math.random()*wld.mon.length)],vx:level<5?2.2:3.5+level*.10});}
  p.vy+=.72;p.y+=p.vy;if(p.y>ground()-65){p.y=ground()-65;p.vy=0}if(p.slide)p.slide--;
  for(let k in active)if(active[k]>0)active[k]--;
  for(let o of objs){o.x-=speed*mult+(o.vx||0);if(active.magnet&&o.t==='coin'&&o.x<innerWidth*.75){o.x+=(p.x-o.x)*.045;o.y+=(p.y-o.y)*.045}}
@@ -167,18 +199,9 @@ function draw(target){
  for(let q of collapse){if(q.timer<110){X.strokeStyle='#2a1710';X.lineWidth=5;X.beginPath();X.moveTo(q.x,q.y+4);X.lineTo(q.x+45,q.y+18);X.lineTo(q.x+90,q.y+3);X.lineTo(q.x+135,q.y+19);X.stroke()}}
  if(chase){X.font='54px serif';X.fillText(chase.e,chase.x,chase.y+55)}
  X.globalAlpha=active.shield?.55:1;
- // Animated runner with visible moving legs/arms. Character emoji becomes the runner's head/identity.
- const rx=p.x+28, ry=p.y+18, phase=frame*.28*(active.turbo?1.6:1), swing=Math.sin(phase)*14;
- X.lineWidth=7; X.lineCap='round'; X.strokeStyle='#172033';
- if(p.slide){
-   X.beginPath();X.moveTo(rx-5,ry+25);X.lineTo(rx+23,ry+38);X.stroke();
-   X.beginPath();X.moveTo(rx+8,ry+35);X.lineTo(rx+31,ry+48);X.moveTo(rx+8,ry+35);X.lineTo(rx-18,ry+45);X.stroke();
- }else{
-   X.beginPath();X.moveTo(rx,ry+20);X.lineTo(rx,ry+43);X.stroke();
-   X.beginPath();X.moveTo(rx,ry+27);X.lineTo(rx+Math.sin(phase+Math.PI)*15,ry+39);X.moveTo(rx,ry+27);X.lineTo(rx+Math.sin(phase)*15,ry+39);X.stroke();
-   X.beginPath();X.moveTo(rx,ry+43);X.lineTo(rx+swing,ry+63);X.moveTo(rx,ry+43);X.lineTo(rx-swing,ry+63);X.stroke();
- }
- X.font='35px serif';X.fillText(chars[sel][1],rx-18,ry+15);X.globalAlpha=1;
+ // Original pop-idol supernatural runner
+ drawHunter(p.x+5,p.y-7,sel,frame*.24*(active.turbo?1.5:1),.78);
+ X.globalAlpha=1;
  if(true){
    let remain=target-dist;
    if(remain<520){
@@ -189,7 +212,13 @@ function draw(target){
      X.font='28px serif';X.fillText('🏁',fx+48,ground()-158);
    }
  }
- let pct=boss?100:Math.min(100,Math.floor(dist/target*100));hud.textContent=`${wo.icon} LEVEL ${level} • ${pct}% • 🪙 ${S.bank}+${runCoins} • ❤️ ${lives}`+(active.shield?' • 👻':'')+(active.turbo?' • ⚡':'')+(active.magnet?' • 🧲':'')
+ let pct=Math.min(100,Math.floor(dist/target*100));hud.textContent=`${wo.icon} LEVEL ${level} • ${pct}% • 🪙 ${S.bank}+${runCoins} • ❤️ ${lives}`+(active.shield?' • 👻':'')+(active.turbo?' • ⚡':'')+(active.magnet?' • 🧲':'')
 }
 draw(1);
+
+window.addEventListener('error',function(e){
+ const t=document.getElementById('toast');
+ if(t){t.textContent='Game error — refresh and try again';t.style.display='block'}
+});
+
 </script></body></html>
