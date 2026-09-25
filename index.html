@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v39</title><style>
+<title>REBOUND v41</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -54,6 +54,66 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 #photoInput{max-width:100%;font-size:16px}
 #bankBig{font-size:26px;font-weight:1000;color:#ffd84a}
 .smallnote{font-size:12px;opacity:.82}
+
+/* v40 compact kid-friendly home */
+#start{
+ overflow:auto;
+ background:
+ radial-gradient(circle at 12% 16%,#ffe45b 0 16px,transparent 17px),
+ radial-gradient(circle at 87% 18%,#ff70c8 0 19px,transparent 20px),
+ radial-gradient(circle at 76% 70%,#70e7ff 0 16px,transparent 17px),
+ linear-gradient(145deg,#6246ea 0%,#3f8cff 48%,#35d59a 100%)!important;
+}
+#start:before{
+ content:"⭐   🎈   ☁️   🚀   🌈   ⭐   🎡   🎢";
+ position:absolute;left:0;right:0;top:6px;
+ font-size:clamp(18px,3vw,34px);letter-spacing:clamp(6px,2vw,24px);
+ opacity:.85;pointer-events:none;white-space:nowrap;overflow:hidden;text-align:center;
+}
+#start>h1{font-size:clamp(34px,7vw,64px)!important;margin:28px 0 0!important;text-shadow:0 4px 0 #31206f,0 7px 18px #0005}
+#start>p{margin:2px 0 6px!important;font-size:clamp(12px,2vw,18px)}
+#hubbar{gap:5px!important;margin:3px auto 5px!important}
+.hubtab{
+ min-width:70px!important;padding:6px 8px!important;border-radius:12px!important;
+ font-size:12px!important;background:#17345de8!important
+}
+.hubtab.active{background:#ffe45b!important;color:#17213a!important;transform:translateY(-1px)}
+#hubpanel{width:min(92vw,690px)!important;padding:7px!important;margin:0 auto 5px!important;border-radius:14px!important}
+#hubpanel [style*="font-size:18px"]{font-size:14px!important}
+.cardgrid{grid-template-columns:repeat(auto-fit,minmax(72px,1fr))!important;gap:5px!important}
+.pickcard{
+ min-height:58px!important;padding:5px 3px!important;border-radius:11px!important;
+ font-size:11px!important;line-height:1.1!important;background:linear-gradient(160deg,#244f82,#15345e)!important
+}
+.bigicon{font-size:24px!important;margin-bottom:1px!important}
+.pickcard small{font-size:9px!important}
+#levelgrid{
+ width:min(92vw,690px)!important;grid-template-columns:repeat(5,1fr)!important;
+ gap:5px!important;margin:3px auto!important
+}
+.lvl{padding:6px 3px!important;min-height:38px!important;font-size:10px!important;border-radius:10px!important}
+#go{padding:9px 24px!important;font-size:17px!important;margin:5px auto!important;border-radius:16px!important}
+#bankBig{font-size:19px!important}
+.smallnote{font-size:10px!important}
+#customPreview{width:58px!important;height:58px!important;margin:4px auto!important}
+#photoInput{font-size:12px!important}
+@media(max-height:500px){
+ #start>h1{font-size:32px!important;margin-top:20px!important}
+ #start>p{display:none}
+ #hubpanel{max-height:155px;overflow:auto}
+ .pickcard{min-height:50px!important}
+ .bigicon{font-size:20px!important}
+}
+
+#celebrate{position:absolute;inset:0;z-index:89;pointer-events:none;display:none}
+.winnerCard{
+ background:linear-gradient(160deg,#5c35df,#167de7 55%,#22c986)!important;
+ border:4px solid #ffe45b!important;border-radius:26px!important;
+ padding:18px 24px!important;text-align:center!important;
+ box-shadow:0 10px 30px #0008!important
+}
+.winnerTitle{font-size:clamp(38px,8vw,72px);font-weight:1000;color:#ffe45b;text-shadow:0 4px 0 #7b3b00,0 7px 15px #0007}
+.winnerCoins{font-size:clamp(25px,5vw,42px);font-weight:1000;margin:8px 0}
 </style><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -62,7 +122,7 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png"></head><body>
 <canvas id="c"></canvas><div id="hud"><span id="life" class="p">❤️❤️❤️</span><span id="coin" class="p">🪙 0</span><span id="levelhud" class="p">LEVEL 1</span></div>
-<div id="controls"><button id="jump" class="ctrl">↑</button><button id="slide" class="ctrl">↓</button></div><div id="msg"></div>
+<div id="controls"><button id="jump" class="ctrl">↑</button><button id="slide" class="ctrl">↓</button></div><canvas id="celebrate"></canvas><div id="msg"></div>
 <div id="start"><div class="startcard">
 <div class="startlogo">REBOUND</div>
 <div class="tag">🎢 RUN • JUMP • SLIDE • COLLECT!</div>
@@ -70,10 +130,10 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 <div class="sectiontitle">🌟 CHOOSE YOUR LEVEL</div>
 
 <div id="hubbar">
- <button class="hubtab active" data-tab="runner" type="button">🏃 RUNNER</button>
- <button class="hubtab" data-tab="boots" type="button">🥾 BOOTS</button>
- <button class="hubtab" data-tab="levels" type="button">🌟 LEVELS</button>
- <button class="hubtab" data-tab="shop" type="button">🛍️ SHOP</button>
+ <button class="hubtab active" data-tab="runner" type="button">🏃 RUNNERS</button>
+ <button class="hubtab" data-tab="boots" type="button">👟 BOOTS</button>
+ <button class="hubtab" data-tab="levels" type="button">🗺️ LEVELS</button>
+ <button class="hubtab" data-tab="shop" type="button">🪙 SHOP</button>
 </div>
 <div id="hubpanel">
  <section class="hubsection active" id="tab-runner">
@@ -113,7 +173,8 @@ let W,H,dpr,run=false,frame=0,dist=0,speed=6.12,jy=0,jv=0,slide=0,lives=3,coins=
 let save={unlocked:1,bank:0};try{save=JSON.parse(localStorage.getItem("rebound27"))||save}catch(e){}
 function saveIt(){localStorage.setItem("rebound27",JSON.stringify(save))}
 function buildLevels(){let g=document.getElementById("levelgrid");g.innerHTML="";for(let i=1;i<=25;i++){let b=document.createElement("button");b.className="lvl"+(i===level?" sel":"");b.disabled=i>save.unlocked;let tn=(typeof THEMES!=="undefined"&&THEMES.length)?THEMES[(i-1)%THEMES.length].name:"";
-b.textContent=i<=save.unlocked?("LEVEL "+i+(tn?" • "+tn:"")):"🔒";
+let ti=["🎡","🌙","⚽","🦁","🦖","👻","🐬","🚀","🐒","❄️"][(i-1)%10];
+b.innerHTML=i<=save.unlocked?('<span style="font-size:17px">'+ti+'</span><br>LEVEL '+i):"🔒";
 b.title=(typeof THEMES!=="undefined"&&THEMES.length)?THEMES[(i-1)%THEMES.length].name:"LEVEL "+i;b.onclick=()=>{level=i;buildLevels()};g.appendChild(b)}document.getElementById("bank").textContent=save.bank||0}
 function resize(){
  dpr=Math.min(devicePixelRatio||1,2);
@@ -244,12 +305,18 @@ function end(ok){
    save.bank=(save.bank||0)+reward;saveIt();
  }
  msgEl.style.display="flex";
- msgEl.innerHTML='<div style="background:#122746ee;border:3px solid #ffffff66;border-radius:24px;padding:20px;min-width:min(84vw,420px);text-align:center">'+
- '<div style="font-size:30px;font-weight:1000">'+(ok?'🏁 ROUND COMPLETE!':'💥 TRY AGAIN!')+'</div>'+
- '<div style="font-size:46px;font-weight:1000;margin:8px">⭐ '+score.toLocaleString()+'</div>'+
- '<div>🪙 Collected: '+coins+' &nbsp; ❤️ Lives: '+Math.max(0,lives)+'</div>'+
- '<div style="margin-top:8px;font-weight:900">'+(flawless?'✨ FLAWLESS! +25 BONUS COINS':ok?'🎁 Reward: +'+reward+' coins':'Finish the round to bank rewards')+'</div></div>';
- setTimeout(()=>{msgEl.style.display="none";startEl.style.display="flex";buildLevels()},2300)
+ if(ok){
+   winnerCelebration();
+   msgEl.innerHTML='<div class="winnerCard">'+
+   '<div class="winnerTitle">🏆 WINNER! 🏆</div>'+
+   '<div class="winnerCoins">🪙 +'+reward+' COINS</div>'+
+   '<div style="font-size:22px;font-weight:1000">⭐ SCORE '+score.toLocaleString()+'</div>'+
+   '<div style="margin-top:7px">Level coins: '+coins+' • Lives left: '+Math.max(0,lives)+'</div>'+
+   '<div style="margin-top:8px;font-weight:1000">'+(flawless?'✨ FLAWLESS RUN! +25 BONUS COINS ✨':hits===1?'🎉 GREAT RUN! +12 BONUS COINS':'🎉 LEVEL COMPLETE!')+'</div></div>';
+ }else{
+   msgEl.innerHTML='<div class="winnerCard"><div style="font-size:34px;font-weight:1000">💥 TRY AGAIN!</div><div style="font-size:24px">⭐ '+score.toLocaleString()+'</div></div>';
+ }
+ setTimeout(()=>{msgEl.style.display="none";startEl.style.display="flex";buildLevels()},2600)
 }
 function loop(){
  if(!run)return;frame++;dist+=speed;if(inv>0)inv--;if(slide>0)slide--;jv+=.6;jy+=jv;if(jy>0){jy=0;jv=0};jy=Math.max(-112,jy);
@@ -381,5 +448,34 @@ if(photoInput)photoInput.addEventListener("change",e=>{
  };rd.readAsDataURL(f);
 });
 renderHub();
+
+
+function winnerCelebration(){
+ const cv=document.getElementById("celebrate");if(!cv)return;
+ cv.style.display="block";
+ const d=Math.min(devicePixelRatio||1,2),r=cv.getBoundingClientRect();
+ cv.width=Math.max(1,r.width*d);cv.height=Math.max(1,r.height*d);
+ const c=cv.getContext("2d");c.setTransform(d,0,0,d,0,0);
+ const ww=r.width,hh=r.height;
+ let bits=[];
+ const syms=["🎉","🎊","⭐","🪙","✨"];
+ for(let i=0;i<75;i++)bits.push({
+   x:Math.random()*ww,y:-Math.random()*hh*.7,
+   vx:(Math.random()-.5)*2.5,vy:2+Math.random()*4,
+   rot:Math.random()*6.28,vr:(Math.random()-.5)*.18,
+   s:12+Math.random()*18,kind:syms[i%syms.length]
+ });
+ let st=performance.now();
+ function anim(now){
+   c.clearRect(0,0,ww,hh);
+   bits.forEach(p=>{
+     p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
+     c.save();c.translate(p.x,p.y);c.rotate(p.rot);
+     c.font=p.s+"px system-ui";c.textAlign="center";c.fillText(p.kind,0,0);c.restore();
+   });
+   if(now-st<2300)requestAnimationFrame(anim);else{c.clearRect(0,0,ww,hh);cv.style.display="none"}
+ }
+ requestAnimationFrame(anim);
+}
 
 </script></body></html>
