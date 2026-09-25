@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v43</title><style>
+<title>REBOUND v44</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -130,6 +130,11 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 }
 #runnerGrid .pickcard.locked{background:linear-gradient(160deg,#e9edf5,#cbd4e5)!important;color:#566176!important}
 #runnerGrid .bigicon{background:#ffffff;border-radius:50%;width:34px;height:34px;line-height:34px;margin:0 auto 3px!important}
+
+@media (orientation:landscape){
+ #game{width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important}
+ #rotateHint{display:none!important}
+}
 </style><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -175,7 +180,7 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 </div>
 <div id="levelgrid"></div>
 <button id="go">▶ START ADVENTURE!</button>
-<div class="how">Swipe UP to jump • Swipe DOWN to slide • Collect coins • 3 lives</div>
+<div class="how">Tap to jump • Double tap to slide • Collect coins • 3 lives</div>
 </div></div>
 <div id="rotateHint"><div>📱↻<br>ROTATE TO LANDSCAPE<small>Turn your phone sideways for the longer REBOUND course view.</small></div></div>
 <script>
@@ -235,7 +240,28 @@ function drawMovingWorld(){
  let t=themeForLevel(), gy=ground();
  let gr=X.createLinearGradient(0,0,0,H);
  gr.addColorStop(0,t.sky1);gr.addColorStop(.68,t.sky2);gr.addColorStop(.681,t.ground);gr.addColorStop(1,"#30353c");
+ 
  X.fillStyle=gr;X.fillRect(0,0,W,H);
+ // full themed backdrop: distant land/buildings, not just floating symbols
+ X.save();
+ X.globalAlpha=.30;
+ X.fillStyle=t.ground;
+ X.beginPath();X.moveTo(0,H*.56);
+ for(let px=0;px<=W+80;px+=80){
+   let yy=H*.53+Math.sin((px+dist*.06)/115)*22;
+   X.lineTo(px,yy);
+ }
+ X.lineTo(W,H*.72);X.lineTo(0,H*.72);X.closePath();X.fill();
+ X.restore();
+ // moving themed structures across the horizon
+ X.save();X.globalAlpha=.92;
+ for(let i=0;i<7;i++){
+   let gap=W/3.1,xx=((i*gap-dist*.10)%(W+gap)+(W+gap))%(W+gap)-gap;
+   let base=H*.58,hh=55+(i%3)*22;
+   X.fillStyle=i%2?"#ffffff33":"#17213a22";
+   X.fillRect(xx-28,base-hh,56,hh);
+ }
+ X.restore();
  X.textAlign="center";
  X.font=Math.max(42,Math.min(82,W*.065))+"px system-ui";
  for(let i=0;i<10;i++){
@@ -246,6 +272,19 @@ function drawMovingWorld(){
  for(let i=0;i<12;i++){
    let gap=W/5,xx=((i*gap-dist*.50)%(W+gap)+(W+gap))%(W+gap)-gap;
    X.fillText(t.near[i%t.near.length],xx,H*.61+(i%3)*10);
+ }
+ 
+ if(level===1){
+   // Ferris wheel
+   let fx=((W*.18-dist*.08)%(W+220)+W+220)%(W+220)-110, fy=H*.48, rr=Math.min(82,W*.07);
+   X.save();X.strokeStyle="#e94d91";X.lineWidth=6;X.beginPath();X.arc(fx,fy,rr,0,Math.PI*2);X.stroke();
+   X.strokeStyle="#ffffffaa";X.lineWidth=2;
+   for(let a=0;a<Math.PI*2;a+=Math.PI/4){X.beginPath();X.moveTo(fx,fy);X.lineTo(fx+Math.cos(a)*rr,fy+Math.sin(a)*rr);X.stroke()}
+   X.strokeStyle="#7352d6";X.lineWidth=7;X.beginPath();X.moveTo(fx,fy+rr);X.lineTo(fx-45,ground());X.moveTo(fx,fy+rr);X.lineTo(fx+45,ground());X.stroke();
+   // roller coaster
+   X.strokeStyle="#d93665";X.lineWidth=8;X.beginPath();X.moveTo(0,H*.48);
+   for(let px=0;px<=W;px+=25)X.lineTo(px,H*.48-Math.sin((px+dist*.12)/95)*48);X.stroke();
+   X.restore();
  }
  X.fillStyle="#3d4148";X.fillRect(0,gy-8,W,H-gy+8);
  X.strokeStyle="#f5f5f5";X.lineWidth=4;X.setLineDash([34,28]);X.lineDashOffset=-(dist*1.35)%62;
@@ -259,10 +298,13 @@ function drawCustomFaceBadge(){
  if(save.runner!=="custom"||!customRunnerData)return;
  if(!window._customImg){window._customImg=new Image();window._customImg.src=customRunnerData}
  let im=window._customImg;if(!im.complete)return;
- let x=Math.max(90,W*.20)+92,y=ground()-178+jy;
+ let x=(W>H?Math.max(70,W*.12):Math.max(90,W*.20))+92,y=ground()-178+jy;
  X.save();X.beginPath();X.arc(x,y,24,0,Math.PI*2);X.clip();X.drawImage(im,x-28,y-28,56,56);X.restore();
  X.strokeStyle="#fff";X.lineWidth=2;X.beginPath();X.arc(x,y,24,0,Math.PI*2);X.stroke();
 }
+
+
+function courseViewMultiplier(){return W>H?2:1}
 
 function ground(){return H*.74}
 function bg(){
@@ -289,9 +331,9 @@ function obstacle(o){
  X.fillStyle="#7d5738";X.fillRect(o.x-39,g-39,8,39);X.fillRect(o.x+31,g-39,8,39);X.fillStyle="#eee";X.fillRect(o.x-47,g-62,94,24);
  X.fillStyle="#e34f48";for(let i=0;i<4;i++){X.save();X.translate(o.x-35+i*24,g-50);X.rotate(0);X.fillRect(-7,-12,14,24);X.restore()}
 }
-function spawn(){obs.push({x:W+150,t:Math.random()<.42?"coin":(Math.random()<.3?"ramp":"barrier")})}
+function spawn(){obs.push({x:W+(W>H?W*.65:150),t:Math.random()<.42?"coin":(Math.random()<.3?"ramp":"barrier")})}
 function drawRunner(){
- let x=Math.max(90,W*.20),y=ground()-185+jy;
+ let x=(W>H?Math.max(70,W*.12):Math.max(90,W*.20)),y=ground()-185+jy;
  let stride=Math.sin(frame*.39),bob=Math.abs(Math.sin(frame*.78))*5;
  X.save();X.translate(x,y+bob);
  if(slide>0){X.translate(82,96);X.rotate(0);X.translate(-82,-96)}
@@ -352,7 +394,7 @@ function end(ok){
 function loop(){
  if(!run)return;frame++;dist+=speed;if(inv>0)inv--;if(slide>0)slide--;jv+=.6;jy+=jv;if(jy>0){jy=0;jv=0};jy=Math.max(-112,jy);
  drawMovingWorld();if(frame%108===0&&dist<3100)spawn();for(const o of obs){o.x-=speed;obstacle(o)}
- let px=Math.max(90,W*.20);
+ let px=(W>H?Math.max(70,W*.12):Math.max(90,W*.20));
  for(const o of obs){if(o.x>px+28&&o.x<px+155){if(o.t==="coin"){o.dead=true;coins++;}else if(inv===0&&jy>-50&&slide===0){o.dead=true;lives--;hits++;inv=65;if(lives<=0){end(false);return}}}}
  obs=obs.filter(o=>!o.dead&&o.x>-100);X.globalAlpha=inv>0&&Math.floor(inv/6)%2?.35:1;drawRunner();X.globalAlpha=1;
  life.textContent="❤️".repeat(lives);coin.textContent="🪙 "+coins;
@@ -373,24 +415,7 @@ try{
 }
 
 
-let gestureStart=null;
-C.addEventListener("pointerdown",e=>{
- if(!run)return;
- gestureStart={x:e.clientX,y:e.clientY,id:e.pointerId};
- try{C.setPointerCapture(e.pointerId)}catch(_){}
- e.preventDefault();
-},{passive:false});
-C.addEventListener("pointerup",e=>{
- if(!run||!gestureStart)return;
- let dx=e.clientX-gestureStart.x,dy=e.clientY-gestureStart.y;
- gestureStart=null;
- if(Math.abs(dy)>=34 && Math.abs(dy)>Math.abs(dx)*.75){
-   if(dy<0){ jump(false); }       // swipe UP = jump
-   else { slide=Math.max(slide,save.boot==="slider"?150:130); } // swipe DOWN = long slide
- }
- e.preventDefault();
-},{passive:false});
-C.addEventListener("pointercancel",()=>{gestureStart=null});
+
 
 
 // v39 RUNNER HUB
@@ -508,5 +533,22 @@ function winnerCelebration(){
  }
  requestAnimationFrame(anim);
 }
+
+
+// v44 controls: tap = jump, double-tap = slide
+let lastGameTap=0,tapTimer=0;
+C.addEventListener("pointerup",e=>{
+ if(!run)return;
+ e.preventDefault();
+ const now=performance.now();
+ if(now-lastGameTap<285){
+   clearTimeout(tapTimer);tapTimer=0;lastGameTap=0;
+   slide=Math.max(slide,130);
+ }else{
+   lastGameTap=now;
+   clearTimeout(tapTimer);
+   tapTimer=setTimeout(()=>{ if(run)jump(false); tapTimer=0; },190);
+ }
+},{passive:false});
 
 </script></body></html>
