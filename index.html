@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v52</title><style>
+<title>REBOUND v53</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -188,7 +188,7 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 <script>
 
 const levelBgImgs=Array.from({length:25},(_,i)=>{
- const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=52`; return im;
+ const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=53`; return im;
 });
 function drawLevelBackgroundImage(){
  const im=levelBgImgs[(level-1)%25];
@@ -355,7 +355,7 @@ function drawCustomFaceBadge(){
  if(save.runner!=="custom"||!customRunnerData)return;
  if(!window._customImg){window._customImg=new Image();window._customImg.src=customRunnerData}
  let im=window._customImg;if(!im.complete)return;
- let x=(W>H?Math.max(70,W*.12):Math.max(90,W*.20))+92,y=ground()-178+jy;
+ let x=(W>H?Math.max(82,W*.14):Math.max(82,W*.18))+92,y=ground()-178+jy;
  X.save();X.beginPath();X.arc(x,y,24,0,Math.PI*2);X.clip();X.drawImage(im,x-28,y-28,56,56);X.restore();
  X.strokeStyle="#fff";X.lineWidth=2;X.beginPath();X.arc(x,y,24,0,Math.PI*2);X.stroke();
 }
@@ -393,11 +393,11 @@ function drawOaklieRunner(x,y,scale){
 
 function drawRoadRunnerGuide(){
  if(!run)return;
- const rx=(W>H?Math.max(70,W*.12):Math.max(85,W*.17));
+ const rx=(W>H?Math.max(82,W*.14):Math.max(82,W*.18));
  const gy=ground();
  X.save();
- X.globalAlpha=.28; X.fillStyle="#000";
- X.beginPath(); X.ellipse(rx,gy+5,42,10,0,0,Math.PI*2); X.fill();
+ X.globalAlpha=.38; X.fillStyle="#000";
+ X.beginPath(); X.ellipse(rx,gy+5,48,11,0,0,Math.PI*2); X.fill();
  X.restore();
 }
 
@@ -426,15 +426,19 @@ function obstacle(o){
  X.fillStyle="#7d5738";X.fillRect(o.x-39,g-39,8,39);X.fillRect(o.x+31,g-39,8,39);X.fillStyle="#eee";X.fillRect(o.x-47,g-62,94,24);
  X.fillStyle="#e34f48";for(let i=0;i<4;i++){X.save();X.translate(o.x-35+i*24,g-50);X.rotate(0);X.fillRect(-7,-12,14,24);X.restore()}
 }
-function spawn(){obs.push({x:W+(W>H?W*.65:150),t:Math.random()<.42?"coin":(Math.random()<.3?"ramp":"barrier")})}
+
+function spawnCoinTrail(){
+  const base=W+(W>H?W*.65:150);
+  for(let i=0;i<4;i++) obs.push({x:base+i*58,t:"coin"});
+}
+
+function spawn(){obs.push({x:W+(W>H?W*.65:150),t:Math.random()<.55?"coin":(Math.random()<.38?"ramp":"barrier")})}
 function drawRunner(){
  if((save.runner==="oaklie"||save.runner==="nova") && oaklieImg.complete && oaklieImg.naturalWidth){
-   drawOaklieRunner((typeof rx!=="undefined"?rx:(W>H?W*.12:W*.20)), ground()+jy, 1);
-   return;
- }
-
- if((save.runner==="oaklie"||save.runner==="nova")){drawOaklieRunner(rx,gy,1);return;}
- let x=(W>H?Math.max(70,W*.12):Math.max(90,W*.20)),y=ground()-185+jy;
+    drawOaklieRunner((W>H?Math.max(82,W*.14):Math.max(82,W*.18)), ground()+jy, 1);
+    return;
+  }
+ let x=(W>H?Math.max(82,W*.14):Math.max(82,W*.18)),y=ground()-185+jy;
  let stride=Math.sin(frame*.39),bob=Math.abs(Math.sin(frame*.78))*5;
  X.save();X.translate(x,y+bob);
  if(slide>0){X.translate(82,96);X.rotate(0);X.translate(-82,-96)}
@@ -492,8 +496,8 @@ function end(ok){
 }
 function loop(){
  if(!run)return;frame++;dist+=speed;if(inv>0)inv--;if(slide>0)slide--;jv+=.6;jy+=jv;if(jy>0){jy=0;jv=0};jy=Math.max(-112,jy);
- drawMovingWorld();if(frame%108===0&&dist<3100)spawn();for(const o of obs){o.x-=speed;obstacle(o)}
- let px=(W>H?Math.max(70,W*.12):Math.max(90,W*.20));
+ drawMovingWorld();if(frame%62===0&&dist<6500)spawn();if(frame%245===0&&dist<6300)spawnCoinTrail();for(const o of obs){o.x-=speed;obstacle(o)}
+ let px=(W>H?Math.max(82,W*.14):Math.max(82,W*.18));
  for(const o of obs){if(o.x>px+28&&o.x<px+155){if(o.t==="coin"){o.dead=true;coins++;}else if(inv===0&&jy>-50&&slide===0){o.dead=true;lives--;hits++;inv=65;if(lives<=0){end(false);return}}}}
  obs=obs.filter(o=>!o.dead&&o.x>-100);X.globalAlpha=inv>0&&Math.floor(inv/6)%2?.35:1;drawRoadRunnerGuide();drawRunner();X.globalAlpha=1;
  life.textContent="❤️".repeat(lives);coin.textContent="🪙 "+coins;
