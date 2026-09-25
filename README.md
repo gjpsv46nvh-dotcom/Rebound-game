@@ -1,11 +1,13 @@
-# REBOUND v22 – Theme Park Road
+# REBOUND v23 – Side-Scrolling Theme Park
 
-Levels 1–5 now run through REBOUND Theme Park:
-- Proper perspective asphalt road with white edge lines and dashed lane markings.
-- Ferris wheel with colourful gondolas.
-- Roller-coaster track.
-- Fantasy theme-park castle/entrance.
-- Balloons and bright park scenery.
-- Road-course obstacles such as cones, barriers and hurdles.
-- Later worlds still change to Night City, Haunted Run, Soccer Stadium and Alien Planet.
-- v21 iPhone swipe fix retained.
+- Restored left-to-right gameplay across the phone.
+- Removed behind-the-runner lane/swipe system.
+- Main runner now uses the supplied photo as the character's face, with blonde hair/tiara and blue-green outfit.
+- Tap to jump; swipe down to slide.
+- Jump height is hard-capped for the side-scrolling screen.
+- Levels 1–5: Theme Park road with Ferris wheel, roller coaster and castle.
+- 6–10: Night Run.
+- 11–15: Ghost World.
+- 16–20: Soccer World.
+- 21–25: Alien World.
+- Obstacles change with each world.
