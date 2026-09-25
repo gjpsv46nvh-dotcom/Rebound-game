@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v56</title><style>
+<title>REBOUND v57</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -186,11 +186,11 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 </div></div>
 <div id="rotateHint"><div>📱↻<br>ROTATE TO LANDSCAPE<small>Turn your phone sideways for the longer REBOUND course view.</small></div></div>
 <script>
-// REBOUND v56: continuous 3D gameplay road + v53 gameplay fixes
+// REBOUND v57: continuous 3D gameplay road + v53 gameplay fixes
 
 
 const levelBgImgs=Array.from({length:25},(_,i)=>{
- const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=56`; return im;
+ const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=57`; return im;
 });
 function drawLevelBackgroundImage(){
  const im=levelBgImgs[(level-1)%25];
@@ -210,7 +210,7 @@ function drawLevelBackgroundImage(){
 
 
 const oaklieImg=new Image();
-oaklieImg.src="./oaklie.png?v=56";
+oaklieImg.src="./oaklie.png?v=57";
 oaklieImg.onerror=()=>console.warn("Oaklie sprite failed to load");
 
 const startEl=document.getElementById("start");
@@ -218,7 +218,7 @@ const hudEl=document.getElementById("hud");
 const controlsEl={style:{display:"none"}};
 const msgEl=document.getElementById("msg");
 
-const C=document.getElementById("c"),X=C.getContext("2d"),scene=new Image(),runner=new Image();scene.src="level-01.jpg?v=56";runner.src="runner.png?v=56";
+const C=document.getElementById("c"),X=C.getContext("2d"),scene=new Image(),runner=new Image();scene.src="level-01.jpg?v=57";runner.src="runner.png?v=57";
 let W,H,dpr,run=false,frame=0,dist=0,speed=6.12,jy=0,jv=0,slide=0,lives=3,coins=0,obs=[],inv=0,level=1,hits=0,startCoins=0;
 let save={unlocked:1,bank:0};try{save=JSON.parse(localStorage.getItem("rebound27"))||save}catch(e){}
 function saveIt(){localStorage.setItem("rebound27",JSON.stringify(save))}
@@ -405,12 +405,10 @@ function drawRoadRunnerGuide(){
 
 
 
-const REALROAD=new Image(); REALROAD.src="realistic-road.jpg?v=56";
+const REALROAD=new Image(); REALROAD.src="realistic-road.jpg?v=57";
 let lane=1, laneX=0, swipeX=null, laneSwipe=false;
 function laneTargetX(){
-  // Three fixed playable lanes on the foreground road: left, centre, right.
-  // The runner never leaves these lane centres.
-  const centers=[W*.37,W*.50,W*.63];
+  const centers=[W*.20,W*.32,W*.44];
   return centers[lane]||centers[1];
 }
 function drawRealisticRoadBackdrop(){
@@ -443,47 +441,24 @@ function drawBehindRunner(){
 
 
 function drawGameplayRoad(){
-  const gy=ground(), horizon=H*.53;
+  const horizon=H*.50,bottom=H;
   X.save();
-
-  // broad 3D road surface: narrow at the horizon, full-width at the foreground
-  let rg=X.createLinearGradient(0,horizon,0,H);
-  rg.addColorStop(0,"rgba(92,96,105,.22)");
-  rg.addColorStop(.34,"rgba(73,77,84,.26)");
-  rg.addColorStop(1,"rgba(43,46,52,.30)");
-  X.fillStyle=rg;
-  X.beginPath();
-  X.moveTo(W*.34,horizon);
-  X.lineTo(W*.66,horizon);
-  X.lineTo(W,H);
-  X.lineTo(0,H);
-  X.closePath();
-  X.fill();
-
-  // bright road edges
-  X.strokeStyle="rgba(255,255,255,.95)";
-  X.lineWidth=Math.max(4,W*.006);
-  X.beginPath(); X.moveTo(W*.34,horizon); X.lineTo(0,H); X.stroke();
-  X.beginPath(); X.moveTo(W*.66,horizon); X.lineTo(W,H); X.stroke();
-
-  // moving centre dashes create obvious forward motion
-  const cycle=140, off=(dist*2.4)%cycle;
-  for(let i=-1;i<9;i++){
-    const y=horizon+i*cycle+off;
-    if(y<horizon||y>H+80) continue;
-    const p=(y-horizon)/(H-horizon);
-    const half=3+18*p;
-    const len=22+70*p;
-    X.fillStyle="rgba(255,238,90,.96)";
-    X.fillRect(W/2-half,y-len/2,half*2,len);
+  let rg=X.createLinearGradient(0,horizon,0,bottom);
+  rg.addColorStop(0,"rgba(58,62,69,.28)");rg.addColorStop(1,"rgba(30,33,38,.62)");
+  X.fillStyle=rg;X.beginPath();
+  X.moveTo(W*.285,horizon);X.lineTo(W*.355,horizon);X.lineTo(W*.52,bottom);X.lineTo(W*.12,bottom);X.closePath();X.fill();
+  X.strokeStyle="rgba(255,255,255,.95)";X.lineWidth=4;
+  X.beginPath();X.moveTo(W*.285,horizon);X.lineTo(W*.12,bottom);X.stroke();
+  X.beginPath();X.moveTo(W*.355,horizon);X.lineTo(W*.52,bottom);X.stroke();
+  const off=(dist*2.2)%90;
+  for(const frac of [1/3,2/3])for(let i=-1;i<8;i++){
+    const y=horizon+i*90+off;if(y<horizon||y>bottom)continue;
+    const z=(y-horizon)/(bottom-horizon);
+    const left=W*.285+(W*.12-W*.285)*z,right=W*.355+(W*.52-W*.355)*z,x=left+(right-left)*frac;
+    X.strokeStyle="rgba(255,255,255,.82)";X.lineWidth=2+5*z;X.beginPath();X.moveTo(x,y);X.lineTo(x,y+18+34*z);X.stroke();
   }
-
-  // road shoulder / runner lane at the playable ground line
-  X.fillStyle="rgba(255,255,255,.18)";
-  X.fillRect(0,gy+4,W,3);
   X.restore();
 }
-
 function ground(){return H*.74}
 function bg(){
  // The generated target artwork is now the visual basis of the actual game.
@@ -501,45 +476,40 @@ function bg(){
  X.fillStyle=grad;X.fillRect(0,g+8,W,H-g);
  X.fillStyle="#c9a27b";X.fillRect(0,g, W,12);X.fillStyle="#79543b";X.fillRect(0,g+12,W,7);
 }
-function coinDraw(x,y){let q=X.createRadialGradient(x-5,y-7,2,x,y,21);q.addColorStop(0,"#fff6a7");q.addColorStop(.4,"#ffd34b");q.addColorStop(1,"#e79308");X.fillStyle=q;X.beginPath();X.arc(x,y,21,0,Math.PI*2);X.fill();X.strokeStyle="#fff0a2";X.lineWidth=3;X.stroke();X.fillStyle="#bd7600";X.font="1000 20px system-ui";X.textAlign="center";X.fillText("★",x,y+7);X.textAlign="left"}
-function obstacle(o){
- let g=ground();
- if(o.t==="coin")return coinDraw(o.x,g-52);
- if(o.t==="ramp"){X.fillStyle="#f39b2c";X.beginPath();X.moveTo(o.x-45,g);X.lineTo(o.x+45,g);X.lineTo(o.x+45,g-55);X.closePath();X.fill();X.fillStyle="#2e65b1";X.beginPath();X.moveTo(o.x-25,g-10);X.lineTo(o.x+23,g-44);X.lineTo(o.x+13,g-26);X.lineTo(o.x+32,g-28);X.lineTo(o.x-15,g-3);X.fill();return}
- X.fillStyle="#7d5738";X.fillRect(o.x-39,g-39,8,39);X.fillRect(o.x+31,g-39,8,39);X.fillStyle="#eee";X.fillRect(o.x-47,g-62,94,24);
- X.fillStyle="#e34f48";for(let i=0;i<4;i++){X.save();X.translate(o.x-35+i*24,g-50);X.rotate(0);X.fillRect(-7,-12,14,24);X.restore()}
+function coinDraw(x,y,s=1){
+ X.save();X.translate(x,y);X.scale(s,s);
+ let q=X.createRadialGradient(-5,-7,2,0,0,21);q.addColorStop(0,"#fff6a7");q.addColorStop(.4,"#ffd34b");q.addColorStop(1,"#e79308");
+ X.fillStyle=q;X.beginPath();X.arc(0,0,21,0,Math.PI*2);X.fill();X.strokeStyle="#fff0a2";X.lineWidth=3;X.stroke();
+ X.fillStyle="#bd7600";X.font="1000 20px system-ui";X.textAlign="center";X.fillText("★",0,7);X.restore();
 }
-
-function spawnCoinTrail(){
-  const base=W+(W>H?W*.65:150);
-  for(let i=0;i<4;i++) obs.push({x:base+i*58,t:"coin"});
+function laneXAtDepth(ln,z){const hx=W*.32,near=[W*.20,W*.32,W*.44];return hx+(near[ln]-hx)*z}
+function roadYAtDepth(z){return H*.50+(H*.79-H*.50)*z}
+function drawPerspectiveObject(o){
+ const z=Math.max(0,Math.min(1,o.z)),x=laneXAtDepth(o.lane,z),y=roadYAtDepth(z),s=.18+.92*z;
+ if(o.t==="coin"){coinDraw(x,y-30*s,s);return}
+ X.save();X.translate(x,y);X.scale(s,s);
+ if(o.t==="ramp"){X.fillStyle="#f39b2c";X.beginPath();X.moveTo(-45,0);X.lineTo(45,0);X.lineTo(45,-55);X.closePath();X.fill();X.fillStyle="#222";X.fillRect(-25,-14,50,7)}
+ else{X.fillStyle="#eee";X.fillRect(-47,-62,94,24);X.fillStyle="#e34f48";for(let i=0;i<4;i++)X.fillRect(-42+i*24,-62,13,24);X.fillStyle="#7d5738";X.fillRect(-39,-39,8,39);X.fillRect(31,-39,8,39)}
+ X.restore();
 }
-
-function spawn(){obs.push({x:W+(W>H?W*.65:150),t:Math.random()<.55?"coin":(Math.random()<.38?"ramp":"barrier")})}
+function spawnCoinTrail(){const ln=Math.floor(Math.random()*3);for(let i=0;i<5;i++)obs.push({z:-i*.11,lane:ln,t:"coin"})}
+function spawn(){const ln=Math.floor(Math.random()*3),r=Math.random();obs.push({z:0,lane:ln,t:r<.48?"coin":(r<.72?"ramp":"barrier")})}
 function drawRunner(){
- if((save.runner==="oaklie"||save.runner==="nova") && oaklieImg.complete && oaklieImg.naturalWidth){
-    drawOaklieRunner(laneTargetX(), ground()+jy, 1);
-    return;
-  }
- let x=laneTargetX(),y=ground()-185+jy;
- let stride=Math.sin(frame*.39),bob=Math.abs(Math.sin(frame*.78))*5;
- X.save();X.translate(x,y+bob);
- if(slide>0){X.translate(82,96);X.rotate(0);X.translate(-82,-96)}
- X.fillStyle="#0005";X.beginPath();X.ellipse(88,196,52,8,0,0,Math.PI*2);X.fill();
- // Forward running lean and rhythmic squash/stretch.
- X.translate(92,98);X.rotate(0);X.scale(1+Math.abs(stride)*.018,1-Math.abs(stride)*.012);X.translate(-92,-98);
- if(runner.complete){
-   // Upper body/head only. Lower fixed legs are cropped out so there is no second frozen pair behind the animation.
-   X.drawImage(runner,0,0,runner.width,runner.height*.60,0,0,184,119);
- }
- // Animated leg-motion accents make the stride visibly cycle instead of only bobbing.
- X.globalAlpha=.92;X.strokeStyle="#e8b894";X.lineWidth=13;X.lineCap="round";
- let hipX=88,hipY=137;
- X.beginPath();X.moveTo(hipX,hipY);X.lineTo(hipX+stride*31,160-Math.max(0,stride)*12);X.lineTo(hipX+stride*52,190-Math.max(0,stride)*20);X.stroke();
- X.beginPath();X.moveTo(hipX-5,hipY);X.lineTo(hipX-stride*29,161-Math.max(0,-stride)*12);X.lineTo(hipX-stride*50,190-Math.max(0,-stride)*20);X.stroke();
- X.strokeStyle="#1b2634";X.lineWidth=12;
- X.beginPath();X.moveTo(hipX+stride*52,190-Math.max(0,stride)*20);X.lineTo(hipX+stride*66+14,191-Math.max(0,stride)*20);X.stroke();
- X.beginPath();X.moveTo(hipX-stride*50,190-Math.max(0,-stride)*20);X.lineTo(hipX-stride*64+14,191-Math.max(0,-stride)*20);X.stroke();
+ const x=laneTargetX(),base=H*.80+jy,bob=Math.abs(Math.sin(frame*.35))*3,stride=Math.sin(frame*.35);
+ X.save();X.translate(x,base+bob);
+ X.fillStyle="rgba(0,0,0,.32)";X.beginPath();X.ellipse(0,5,34,9,0,0,Math.PI*2);X.fill();
+ X.lineCap="round";X.lineWidth=13;X.strokeStyle="#d7a27f";
+ X.beginPath();X.moveTo(-10,-55);X.lineTo(-13+stride*15,-28);X.lineTo(-18+stride*25,-3);X.stroke();
+ X.beginPath();X.moveTo(10,-55);X.lineTo(13-stride*15,-28);X.lineTo(18-stride*25,-3);X.stroke();
+ X.strokeStyle="#15191f";X.lineWidth=11;
+ X.beginPath();X.moveTo(-18+stride*25,-3);X.lineTo(-28+stride*28,0);X.stroke();
+ X.beginPath();X.moveTo(18-stride*25,-3);X.lineTo(28-stride*28,0);X.stroke();
+ X.fillStyle="#111820";X.beginPath();X.roundRect(-29,-121,58,72,18);X.fill();
+ X.strokeStyle="#d7a27f";X.lineWidth=11;
+ X.beginPath();X.moveTo(-24,-103);X.lineTo(-38-stride*11,-72);X.stroke();
+ X.beginPath();X.moveTo(24,-103);X.lineTo(38+stride*11,-72);X.stroke();
+ X.fillStyle="#d7a27f";X.beginPath();X.arc(0,-139,20,0,Math.PI*2);X.fill();
+ X.fillStyle="#6b3d24";X.beginPath();X.arc(0,-145,21,Math.PI,Math.PI*2);X.fill();
  X.restore();
 }
 function doJump(){if(run&&jy===0&&slide===0)jv=-16.5} function doSlide(){if(run&&jy===0)slide=110}
@@ -578,11 +548,19 @@ function end(ok){
  setTimeout(()=>{msgEl.style.display="none";startEl.style.display="flex";buildLevels()},2600)
 }
 function loop(){
- if(!run)return;frame++;dist+=speed;if(inv>0)inv--;if(slide>0)slide--;jv+=.6;jy+=jv;if(jy>0){jy=0;jv=0};jy=Math.max(-112,jy);
- drawRealisticRoadBackdrop();drawGameplayRoad();if(frame%62===0&&dist<6500)spawn();if(frame%245===0&&dist<6300)spawnCoinTrail();for(const o of obs){o.x-=speed;obstacle(o)}
- let px=laneTargetX();
- for(const o of obs){if(o.x>px+28&&o.x<px+155){if(o.t==="coin"){o.dead=true;coins++;}else if(inv===0&&jy>-50&&slide===0){o.dead=true;lives--;hits++;inv=65;if(lives<=0){end(false);return}}}}
- obs=obs.filter(o=>!o.dead&&o.x>-100);X.globalAlpha=inv>0&&Math.floor(inv/6)%2?.35:1;drawRoadRunnerGuide();drawRunner();X.globalAlpha=1;
+ if(!run)return;frame++;dist+=speed;if(inv>0)inv--;if(slide>0)slide--;
+ jv+=.6;jy+=jv;if(jy>0){jy=0;jv=0};jy=Math.max(-112,jy);
+ drawRealisticRoadBackdrop();drawGameplayRoad();
+ if(frame%54===0&&dist<6500)spawn();if(frame%220===0&&dist<6300)spawnCoinTrail();
+ for(const o of obs){
+   o.z+=.0105+speed*.00018;drawPerspectiveObject(o);
+   if(!o.dead&&o.z>.82&&o.z<1.03&&o.lane===lane){
+     if(o.t==="coin"){o.dead=true;coins++}
+     else if(inv===0&&jy>-50&&slide===0){o.dead=true;lives--;hits++;inv=65;if(lives<=0){end(false);return}}
+   }
+ }
+ obs=obs.filter(o=>!o.dead&&o.z<1.12);
+ X.globalAlpha=inv>0&&Math.floor(inv/6)%2?.35:1;drawRunner();X.globalAlpha=1;
  life.textContent="❤️".repeat(lives);coin.textContent="🪙 "+coins;
  if(dist>6800){end(true);return}requestAnimationFrame(loop)
 }
