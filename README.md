@@ -1,7 +1,7 @@
-# REBOUND v29
-- Leg animation slowed by 25%.
-- Fixed lower-body/leg image removed: only the runner's upper body/head is drawn from the transparent sprite; the moving legs are the visible legs.
-- Transparent runner asset cleaned to reduce background/fringe.
-- Runner moved farther left to create a longer view ahead.
-- Obstacles spawn farther off-screen and with wider spacing, giving more reaction time.
-- v28 speed, start screen, levels, rewards, lives, coins, jump and slide retained.
+# REBOUND v30
+- Landscape play supported and encouraged with a rotate-phone prompt in portrait.
+- Canvas resizes when the phone rotates, creating a much wider course view.
+- Attempts landscape orientation lock where the browser supports it; iPhone can still be rotated manually.
+- Runner PNG cleaned again with a true transparent background and stray background islands removed.
+- Fixed lower-body picture remains removed; animated legs are visible without a frozen pair behind them.
+- v29 obstacle spacing, levels, rewards, lives, coins, jump and slide retained.
