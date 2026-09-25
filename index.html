@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v53</title><style>
+<title>REBOUND v54</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -186,9 +186,11 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 </div></div>
 <div id="rotateHint"><div>📱↻<br>ROTATE TO LANDSCAPE<small>Turn your phone sideways for the longer REBOUND course view.</small></div></div>
 <script>
+// REBOUND v54: continuous 3D gameplay road + v53 gameplay fixes
+
 
 const levelBgImgs=Array.from({length:25},(_,i)=>{
- const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=53`; return im;
+ const im=new Image(); im.src=`level-${String(i+1).padStart(2,"0")}.jpg?v=54`; return im;
 });
 function drawLevelBackgroundImage(){
  const im=levelBgImgs[(level-1)%25];
@@ -208,7 +210,7 @@ function drawLevelBackgroundImage(){
 
 
 const oaklieImg=new Image();
-oaklieImg.src="./oaklie.png?v=47";
+oaklieImg.src="./oaklie.png?v=54";
 oaklieImg.onerror=()=>console.warn("Oaklie sprite failed to load");
 
 const startEl=document.getElementById("start");
@@ -216,7 +218,7 @@ const hudEl=document.getElementById("hud");
 const controlsEl={style:{display:"none"}};
 const msgEl=document.getElementById("msg");
 
-const C=document.getElementById("c"),X=C.getContext("2d"),scene=new Image(),runner=new Image();scene.src="level-01.jpg?v=53";runner.src="runner.png?v=53";
+const C=document.getElementById("c"),X=C.getContext("2d"),scene=new Image(),runner=new Image();scene.src="level-01.jpg?v=54";runner.src="runner.png?v=54";
 let W,H,dpr,run=false,frame=0,dist=0,speed=6.12,jy=0,jv=0,slide=0,lives=3,coins=0,obs=[],inv=0,level=1,hits=0,startCoins=0;
 let save={unlocked:1,bank:0};try{save=JSON.parse(localStorage.getItem("rebound27"))||save}catch(e){}
 function saveIt(){localStorage.setItem("rebound27",JSON.stringify(save))}
@@ -401,6 +403,49 @@ function drawRoadRunnerGuide(){
  X.restore();
 }
 
+
+function drawGameplayRoad(){
+  const gy=ground(), horizon=H*.53;
+  X.save();
+
+  // broad 3D road surface: narrow at the horizon, full-width at the foreground
+  let rg=X.createLinearGradient(0,horizon,0,H);
+  rg.addColorStop(0,"rgba(92,96,105,.92)");
+  rg.addColorStop(.34,"rgba(73,77,84,.96)");
+  rg.addColorStop(1,"rgba(43,46,52,.99)");
+  X.fillStyle=rg;
+  X.beginPath();
+  X.moveTo(W*.34,horizon);
+  X.lineTo(W*.66,horizon);
+  X.lineTo(W,H);
+  X.lineTo(0,H);
+  X.closePath();
+  X.fill();
+
+  // bright road edges
+  X.strokeStyle="rgba(255,255,255,.95)";
+  X.lineWidth=Math.max(4,W*.006);
+  X.beginPath(); X.moveTo(W*.34,horizon); X.lineTo(0,H); X.stroke();
+  X.beginPath(); X.moveTo(W*.66,horizon); X.lineTo(W,H); X.stroke();
+
+  // moving centre dashes create obvious forward motion
+  const cycle=140, off=(dist*2.4)%cycle;
+  for(let i=-1;i<9;i++){
+    const y=horizon+i*cycle+off;
+    if(y<horizon||y>H+80) continue;
+    const p=(y-horizon)/(H-horizon);
+    const half=3+18*p;
+    const len=22+70*p;
+    X.fillStyle="rgba(255,238,90,.96)";
+    X.fillRect(W/2-half,y-len/2,half*2,len);
+  }
+
+  // road shoulder / runner lane at the playable ground line
+  X.fillStyle="rgba(255,255,255,.18)";
+  X.fillRect(0,gy+4,W,3);
+  X.restore();
+}
+
 function ground(){return H*.74}
 function bg(){
  // The generated target artwork is now the visual basis of the actual game.
@@ -496,7 +541,7 @@ function end(ok){
 }
 function loop(){
  if(!run)return;frame++;dist+=speed;if(inv>0)inv--;if(slide>0)slide--;jv+=.6;jy+=jv;if(jy>0){jy=0;jv=0};jy=Math.max(-112,jy);
- drawMovingWorld();if(frame%62===0&&dist<6500)spawn();if(frame%245===0&&dist<6300)spawnCoinTrail();for(const o of obs){o.x-=speed;obstacle(o)}
+ drawMovingWorld();drawGameplayRoad();if(frame%62===0&&dist<6500)spawn();if(frame%245===0&&dist<6300)spawnCoinTrail();for(const o of obs){o.x-=speed;obstacle(o)}
  let px=(W>H?Math.max(82,W*.14):Math.max(82,W*.18));
  for(const o of obs){if(o.x>px+28&&o.x<px+155){if(o.t==="coin"){o.dead=true;coins++;}else if(inv===0&&jy>-50&&slide===0){o.dead=true;lives--;hits++;inv=65;if(lives<=0){end(false);return}}}}
  obs=obs.filter(o=>!o.dead&&o.x>-100);X.globalAlpha=inv>0&&Math.floor(inv/6)%2?.35:1;drawRoadRunnerGuide();drawRunner();X.globalAlpha=1;
