@@ -1,9 +1,11 @@
-# REBOUND v20 – Swipe / Jump Fix
+# REBOUND v22 – Theme Park Road
 
-- Horizontal swipes now only change lanes.
-- Down swipe slides.
-- A jump only happens from a short tap.
-- Upward/diagonal swipes no longer accidentally trigger a jump.
-- Jump height is capped so the runner cannot fly toward the top of the screen.
-- Jump physics tuned for the behind-the-runner camera.
-- All v19 themed worlds and obstacles retained.
+Levels 1–5 now run through REBOUND Theme Park:
+- Proper perspective asphalt road with white edge lines and dashed lane markings.
+- Ferris wheel with colourful gondolas.
+- Roller-coaster track.
+- Fantasy theme-park castle/entrance.
+- Balloons and bright park scenery.
+- Road-course obstacles such as cones, barriers and hurdles.
+- Later worlds still change to Night City, Haunted Run, Soccer Stadium and Alien Planet.
+- v21 iPhone swipe fix retained.

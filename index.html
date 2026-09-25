@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>REBOUND v20</title>
+<title>REBOUND v22</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:#08152b;color:#fff}
 canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
@@ -19,6 +19,8 @@ button{font:inherit}.primary{width:100%;margin-top:14px;padding:16px;border:0;bo
 #hud{position:fixed;top:10px;left:10px;right:10px;display:none;z-index:3;background:#08152bbb;border-radius:12px;padding:8px 12px;font-weight:800}
 #msg{position:fixed;left:50%;top:18%;transform:translateX(-50%);display:none;background:#08152be8;padding:12px 18px;border-radius:12px;z-index:4}
 @media(max-width:560px){.grid{grid-template-columns:repeat(3,1fr)}.panel{padding:12px}.card,.level{min-height:54px}}
+
+#game{touch-action:none;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
 </style>
 </head>
 <body>
@@ -61,7 +63,7 @@ buildMenu();
 function theme(){
  let w=Math.floor((level-1)/5);
  return [
-  {name:"SUNNY PARK",sky1:"#62c9ff",sky2:"#e9fbff",ground:"#4a9a4b",side:"#6ec45e",obs:["cone","log","hurdle"]},
+  {name:"REBOUND THEME PARK",sky1:"#62c9ff",sky2:"#e9fbff",ground:"#4b5058",side:"#6ec45e",obs:["cone","hurdle","barrier"]},
   {name:"NIGHT CITY",sky1:"#07142f",sky2:"#243d70",ground:"#293246",side:"#16213c",obs:["barrier","alien","hurdle"]},
   {name:"HAUNTED RUN",sky1:"#211331",sky2:"#695177",ground:"#30313a",side:"#1c2523",obs:["ghost","grave","gate"]},
   {name:"SOCCER STADIUM",sky1:"#6ac8ff",sky2:"#dff7ff",ground:"#31864b",side:"#55aa5f",obs:["ball","goal","hurdle"]},
@@ -95,10 +97,39 @@ function drawWorld(){
  if(Math.floor((level-1)/5)===3){ // stadium
    X.fillStyle="#d8e4ef";X.fillRect(0,H*.20,W,H*.18);X.fillStyle="#65788c";for(let x=8;x<W;x+=20)for(let y=H*.22;y<H*.36;y+=14)X.fillRect(x,y,5,5);
  }
+ if(Math.floor((level-1)/5)===0){
+   // Ferris wheel
+   X.save();X.translate(W*.16,H*.28);X.strokeStyle="#f7f7ff";X.lineWidth=5;
+   X.beginPath();X.arc(0,0,62,0,Math.PI*2);X.stroke();
+   for(let q=0;q<8;q++){let a=q*Math.PI/4;X.beginPath();X.moveTo(0,0);X.lineTo(Math.cos(a)*62,Math.sin(a)*62);X.stroke();
+     X.fillStyle=["#ff5e79","#ffd54f","#53d6ff","#9b6cff"][q%4];X.fillRect(Math.cos(a)*62-7,Math.sin(a)*62-6,14,12)}
+   X.strokeStyle="#dce5ed";X.beginPath();X.moveTo(0,0);X.lineTo(-35,88);X.moveTo(0,0);X.lineTo(35,88);X.stroke();X.restore();
+   // Roller coaster track
+   X.strokeStyle="#ec4e68";X.lineWidth=6;X.beginPath();X.moveTo(W*.45,H*.30);X.bezierCurveTo(W*.57,H*.12,W*.66,H*.48,W*.80,H*.23);X.bezierCurveTo(W*.88,H*.13,W*.93,H*.32,W,H*.22);X.stroke();
+   X.strokeStyle="#f5d65b";X.lineWidth=3;for(let q=0;q<8;q++){let xx=W*.48+q*W*.065;X.beginPath();X.moveTo(xx,H*.29);X.lineTo(xx,H*.35);X.stroke()}
+   // Castle / park entrance
+   X.fillStyle="#7d65d8";X.fillRect(W*.78,H*.25,W*.16,H*.13);X.fillStyle="#f4d35e";
+   X.beginPath();X.moveTo(W*.77,H*.25);X.lineTo(W*.82,H*.18);X.lineTo(W*.87,H*.25);X.fill();
+   X.beginPath();X.moveTo(W*.87,H*.25);X.lineTo(W*.92,H*.17);X.lineTo(W*.96,H*.25);X.fill();
+   X.fillStyle="#5a3fa8";X.fillRect(W*.845,H*.31,W*.03,H*.07);
+   // Balloons
+   for(let q=0;q<5;q++){X.fillStyle=["#ff6680","#ffd34e","#4fd2ff","#8f6aff","#51d58b"][q];X.beginPath();X.arc(W*.35+q*13,H*.22-(q%2)*15,7,0,Math.PI*2);X.fill()}
+ }
  X.fillStyle=t.side;X.fillRect(0,H*.27,W,H*.73);
- let a=roadEdges(0),b=roadEdges(1);X.fillStyle=t.ground;X.beginPath();X.moveTo(a.left,a.y);X.lineTo(a.right,a.y);X.lineTo(b.right,b.y);X.lineTo(b.left,b.y);X.closePath();X.fill();
- // perspective lane markers
- X.strokeStyle="rgba(255,255,255,.48)";X.lineWidth=3;for(let k=1;k<=2;k++){X.beginPath();X.moveTo(laneX(k-1,0)*.5+laneX(k,0)*.5,H*.27);X.lineTo(laneX(k-1,1)*.5+laneX(k,1)*.5,H*.97);X.stroke()}
+ let a=roadEdges(0),b=roadEdges(1);
+ // road shoulders
+ X.fillStyle=Math.floor((level-1)/5)===0?"#d7d9dc":t.ground;X.beginPath();X.moveTo(a.left-7,a.y);X.lineTo(a.right+7,a.y);X.lineTo(b.right+18,b.y);X.lineTo(b.left-18,b.y);X.closePath();X.fill();
+ // asphalt road
+ X.fillStyle=Math.floor((level-1)/5)===0?"#4b5058":t.ground;X.beginPath();X.moveTo(a.left,a.y);X.lineTo(a.right,a.y);X.lineTo(b.right,b.y);X.lineTo(b.left,b.y);X.closePath();X.fill();
+ // road edge lines
+ X.strokeStyle="#fff";X.lineWidth=4;X.beginPath();X.moveTo(a.left,a.y);X.lineTo(b.left,b.y);X.moveTo(a.right,a.y);X.lineTo(b.right,b.y);X.stroke();
+ // perspective dashed lane lines
+ X.strokeStyle="rgba(255,255,255,.82)";
+ for(let k=1;k<=2;k++){
+   for(let q=0;q<8;q+=2){let z1=q/8,z2=(q+1)/8;let e1=roadEdges(z1),e2=roadEdges(z2);
+     let lx1=(laneX(k-1,z1)+laneX(k,z1))/2,lx2=(laneX(k-1,z2)+laneX(k,z2))/2;
+     X.lineWidth=1+z1*5;X.beginPath();X.moveTo(lx1,e1.y);X.lineTo(lx2,e2.y);X.stroke()}
+ }
  X.fillStyle="rgba(255,255,255,.92)";X.font="900 15px system-ui";X.fillText(t.name+" • LEVEL "+level,14,28);
 }
 function drawObstacle(o){
@@ -149,7 +180,7 @@ function gameDraw(){
  objects=objects.filter(o=>!o.dead&&o.z<1.14);
  // finish banner comes toward camera
  if(finish){let z=Math.min(1.05,(dist-target)/500),y=roadEdges(z).y,sc=.35+z;X.save();X.translate(W/2,y);X.scale(sc,sc);X.fillStyle="#17243a";X.fillRect(-70,-95,140,35);X.fillStyle="#fff";X.font="900 18px system-ui";X.textAlign="center";X.fillText("FINISH",0,-71);X.restore();if(z>=1){end(true);return}}
- let px=laneX(Math.max(0,Math.min(2,lane)),1)-25,py=H*.80+jumpY;
+ jumpY=Math.max(-95,Math.min(0,jumpY));let px=laneX(Math.max(0,Math.min(2,lane)),1)-25,py=Math.max(H*.62,H*.80+jumpY);
  X.globalAlpha=(invuln>0&&Math.floor(invuln/6)%2)?0.35:1;
  if(slide>0){X.save();X.translate(px+25,py+42);X.rotate(Math.PI/2);drawRunner(-25,-42,sel,frame*.42,.92);X.restore()}else drawRunner(px,py,sel,frame*.42,.92);
  X.globalAlpha=1;
@@ -157,23 +188,46 @@ function gameDraw(){
 }
 function end(win){running=false;hud.style.display="none";if(win){save.unlocked=Math.max(save.unlocked,Math.min(25,level+1));persist();msg.textContent="🏁 LEVEL COMPLETE!";msg.style.display="block";setTimeout(()=>{msg.style.display="none";menu.style.display="flex";buildMenu()},900)}else{msg.textContent="Try again!";msg.style.display="block";setTimeout(()=>{msg.style.display="none";menu.style.display="flex"},800)}}
 function loop(){if(intro){frame++;introDraw()}else if(running)gameDraw();if(intro||running)requestAnimationFrame(loop)}
-function doJump(){if(!running)return;if(jumpY===0)jumpV=-11.6}
-C.addEventListener("pointerdown",e=>{audio();lastX=e.clientX;lastY=e.clientY});
+function doJump(){if(!running)return;if(jumpY===0)jumpV=-9.8}
+C.addEventListener("pointerdown",e=>{
+ e.preventDefault(); audio();
+ lastX=e.clientX; lastY=e.clientY;
+ try{C.setPointerCapture(e.pointerId)}catch(_){}
+},{passive:false});
+
+C.addEventListener("pointermove",e=>{
+ if(running)e.preventDefault();
+},{passive:false});
+
 C.addEventListener("pointerup",e=>{
+ e.preventDefault();
  if(!running)return;
  let dx=e.clientX-lastX,dy=e.clientY-lastY,ax=Math.abs(dx),ay=Math.abs(dy);
- if(ax>32 && ax>ay*0.75){
+
+ // A clear sideways swipe ALWAYS changes lane and never changes vertical position.
+ if(ax>=28 && ax>=ay*.65){
    targetLane=Math.max(0,Math.min(2,targetLane+(dx>0?1:-1)));
+   jumpY=0; jumpV=0;
    return;
  }
- if(dy>38 && ay>ax){
+
+ // Downward swipe slides.
+ if(dy>=34 && ay>ax){
    slide=42;
+   jumpY=0; jumpV=0;
    return;
  }
- if(ax<22 && ay<22){
+
+ // Only a genuine stationary tap can jump.
+ if(ax<=12 && ay<=12){
    doJump();
  }
-});
+},{passive:false});
+
+C.addEventListener("pointercancel",e=>{
+ e.preventDefault();
+ jumpY=0; jumpV=0;
+},{passive:false});
 addEventListener("keydown",e=>{if(e.code==="ArrowLeft")targetLane=Math.max(0,targetLane-1);if(e.code==="ArrowRight")targetLane=Math.min(2,targetLane+1);if(e.code==="ArrowDown")slide=42;if(e.code==="Space"||e.code==="ArrowUp")doJump()});
 window.addEventListener("error",()=>{msg.textContent="Game error — reload page";msg.style.display="block"});
 </script>
