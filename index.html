@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Runbound v3</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101d;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+canvas{display:block;width:100vw;height:100vh;touch-action:none}
+.screen{position:fixed;inset:0;background:linear-gradient(#07101df2,#101d31f2);display:flex;align-items:center;justify-content:center;padding:14px;z-index:4}
+.panel{width:min(920px,97vw);max-height:94vh;overflow:auto;background:#14253d;border:1px solid #ffffff22;border-radius:24px;padding:20px;text-align:center;box-shadow:0 25px 80px #0009}
+h1{font-size:44px;margin:0}.tag{opacity:.72;margin:3px 0 14px}.section{margin-top:17px}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.card,.world,.level,.boost{background:#203754;border:2px solid transparent;color:#fff;border-radius:14px;padding:9px;font-weight:800}
+.card.sel,.level.sel{border-color:#ffe45e}.card.locked,.level:disabled{opacity:.4}.emoji{display:block;font-size:31px}.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.world{min-width:130px}.world.locked{opacity:.4}.world strong{display:block}.world small,.boost small{display:block;opacity:.68;font-weight:600}
+.primary{background:#ffe45e;color:#142033;border:0;border-radius:14px;padding:14px 26px;font-weight:950;font-size:17px;margin:15px 5px 4px}
+.hud{position:fixed;left:12px;top:12px;z-index:2;background:#07101dcc;border:1px solid #ffffff20;border-radius:12px;padding:9px 12px;font-weight:850}
+.bar{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:7px}.bar button{border:1px solid #ffffff22;border-radius:12px;padding:10px 12px;background:#142b47;color:white;font-weight:850}.bar button:disabled{opacity:.35}
+#bossHud{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:2;width:min(520px,80vw);display:none;text-align:center;font-weight:900}
+#bossBar{height:14px;background:#0006;border-radius:99px;overflow:hidden;border:1px solid #fff4}#bossFill{height:100%;width:100%;background:#fff}
+.toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:5;background:#08111ddd;border-radius:14px;padding:12px 18px;font-weight:900;display:none}
+@media(max-width:620px){.grid{grid-template-columns:repeat(2,1fr)}h1{font-size:35px}.panel{padding:15px}}
+</style></head>
+<body>
+<canvas id="game"></canvas><div class="hud" id="hud" style="display:none"></div>
+<div id="bossHud">BOSS <div id="bossBar"><div id="bossFill"></div></div></div>
+<div class="bar" id="boostbar" style="display:none"></div><div class="toast" id="toast"></div>
+<div class="screen" id="menu"><div class="panel">
+<h1>RUNBOUND</h1><div class="tag">Run • Dodge • Collect • Upgrade • Defeat the bosses</div>
+<div>Bank: 🪙 <b id="bank"></b> &nbsp; | &nbsp; ⭐ <b id="stars"></b></div>
+<div class="section"><b>Choose Runner</b><div class="grid" id="chars"></div></div>
+<div class="section"><b>Worlds</b><div class="row" id="worlds"></div></div>
+<div class="section"><b>Levels</b><div class="row" id="levels"></div></div>
+<div class="section"><b>Boost Shop</b><div class="row" id="shop"></div></div>
+<button class="primary" id="play">PLAY LEVEL</button>
+<div class="tag">Tap = jump • double tap = high jump • swipe down = slide • tap ATTACK during boss fights</div>
+</div></div>
+<script>
+const C=document.getElementById('game'),X=C.getContext('2d'),DPR=()=>devicePixelRatio||1;
+function resize(){C.width=innerWidth*DPR();C.height=innerHeight*DPR();X.setTransform(DPR(),0,0,DPR(),0,0)} addEventListener('resize',resize);resize();
+const W=[
+ {name:'Greenlands',icon:'🌳',sky:['#5bc0eb','#d9f4ff'],ground:'#2f7d45',mon:['👾','🐛','🐺'],boss:'🦖'},
+ {name:'Dark Forest',icon:'🌲',sky:['#243b55','#141e30'],ground:'#24452e',mon:['🧟','🕷️','👹'],boss:'👹'},
+ {name:'Ice Caves',icon:'❄️',sky:['#7fdbff','#eafaff'],ground:'#8ed8ea',mon:['🐺','👻','🧊'],boss:'🦣'},
+ {name:'Volcano',icon:'🌋',sky:['#542437','#ff7043'],ground:'#51251f',mon:['🔥','👺','🐲'],boss:'🐉'},
+ {name:'Monster Kingdom',icon:'🏰',sky:['#4527a0','#9c6ade'],ground:'#3d315b',mon:['👿','💀','🐲'],boss:'👑'}
+];
+const chars=[['Blaze','🧑‍🚀'],['Nova','🥷'],['Rex','🦸'],['Luna','🧙'],['Bolt','🤖'],['Milo','🧝'],['Skye','🧚'],['Dash','🧑‍🎤'],['Rocky','🦹'],['Ace','🧑‍🚒']];
+const boosts={shield:{n:'Ghost Shield',i:'👻',d:'Invincible 10 sec',c:75},turbo:{n:'Turbo',i:'⚡',d:'Speed + score boost',c:60},magnet:{n:'Coin Magnet',i:'🧲',d:'Pull nearby coins',c:50},heart:{n:'Extra Heart',i:'❤️',d:'+1 life instantly',c:90}};
+let S=JSON.parse(localStorage.getItem('runbound3')||'null')||{bank:150,stars:0,unlocked:1,shield:0,turbo:0,magnet:0,heart:0,charUnlocked:3};
+function save(){localStorage.setItem('runbound3',JSON.stringify(S))}
+let sel=0, level=1;
+const $=id=>document.getElementById(id), menu=$('menu'),hud=$('hud'),boostbar=$('boostbar'),toast=$('toast');
+function worldFor(l){return Math.floor((l-1)/5)} function showToast(t){toast.textContent=t;toast.style.display='block';setTimeout(()=>toast.style.display='none',1200)}
+function render(){
+ $('bank').textContent=S.bank;$('stars').textContent=S.stars;
+ $('chars').innerHTML=''; chars.forEach((c,i)=>{let b=document.createElement('button'),locked=i>=S.charUnlocked;b.className='card '+(i==sel?'sel ':'')+(locked?'locked':'');b.innerHTML=`<span class=emoji>${locked?'🔒':c[1]}</span>${c[0]}${locked?`<small>${(i+1)*8} ⭐</small>`:''}`;b.onclick=()=>{if(!locked){sel=i;render()}else if(S.stars>=(i+1)*8){S.stars-=(i+1)*8;S.charUnlocked=i+1;save();render()}};$('chars').appendChild(b)});
+ $('worlds').innerHTML='';W.forEach((w,i)=>{let min=i*5+1,locked=S.unlocked<min,b=document.createElement('button');b.className='world '+(locked?'locked':'');b.innerHTML=`${w.icon} <strong>${w.name}</strong><small>Levels ${min}-${min+4}</small>`;b.onclick=()=>{if(!locked){level=Math.max(min,Math.min(S.unlocked,min+4));render()}};$('worlds').appendChild(b)});
+ $('levels').innerHTML='';let wi=worldFor(level),start=wi*5+1;for(let l=start;l<start+5;l++){let b=document.createElement('button');b.className='level '+(l==level?'sel':'');b.disabled=l>S.unlocked;b.textContent=(l%5==0?'👑 ':'')+'Level '+l;b.onclick=()=>{level=l;render()};$('levels').appendChild(b)}
+ $('shop').innerHTML='';Object.entries(boosts).forEach(([k,v])=>{let b=document.createElement('button');b.className='boost';b.innerHTML=`${v.i} ${v.n}<small>${v.d}</small><small>🪙 ${v.c} • Owned ${S[k]}</small>`;b.onclick=()=>{if(S.bank>=v.c){S.bank-=v.c;S[k]++;save();render()}else showToast('Not enough coins')};$('shop').appendChild(b)})
+}
+render();
+let running=false,frame=0,dist=0,runCoins=0,lives=3,objs=[],shots=[],speed=6,p={x:110,y:0,vy:0,slide:0},active={shield:0,turbo:0,magnet:0},boss=null,lastTap=0,sy=0;
+const ground=()=>innerHeight-105;
+function boostUI(){boostbar.innerHTML='';for(let [k,v] of Object.entries(boosts)){let b=document.createElement('button');b.textContent=`${v.i} ${S[k]}`;b.disabled=!S[k];b.onclick=()=>{if(!S[k])return;S[k]--;if(k==='heart')lives++;else active[k]=600;save();boostUI()};boostbar.appendChild(b)}if(boss){let a=document.createElement('button');a.textContent='💥 ATTACK';a.onclick=attack;boostbar.appendChild(a)}}
+function start(){menu.style.display='none';hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];speed=6+level*.12;p.y=ground()-65;p.vy=0;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)}
+$('play').onclick=start;
+function jump(high=false){if(!running)return;if(p.y>=ground()-66)p.vy=high?-18:-14}
+C.addEventListener('pointerdown',e=>{sy=e.clientY;let n=Date.now();jump(n-lastTap<280);lastTap=n});C.addEventListener('pointerup',e=>{if(e.clientY-sy>45)p.slide=35});
+addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')jump(false);if(e.code==='ArrowDown')p.slide=35;if(e.code==='KeyX')attack()});
+function spawn(){let w=W[worldFor(level)],r=Math.random(),g=ground();if(r<.45)objs.push({t:'monster',x:innerWidth+50,y:g-52,w:50,h:50,e:w.mon[Math.floor(Math.random()*w.mon.length)]});else if(r<.82){let rare=Math.random()<.08;objs.push({t:'coin',x:innerWidth+50,y:g-100-Math.random()*110,w:30,h:30,e:rare?'💎':'🪙',val:rare?10:1})}else objs.push({t:'rock',x:innerWidth+50,y:g-40,w:45,h:40,e:'🪨'})}
+function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
+function attack(){if(!boss||!running)return;shots.push({x:p.x+45,y:p.y+22,w:22,h:12});}
+function beginBoss(){let w=W[worldFor(level)];boss={x:innerWidth-150,y:ground()-120,w:100,h:110,hp:8+worldFor(level)*4,max:8+worldFor(level)*4,e:w.boss,cool:0};$('bossHud').style.display='block';boostUI();showToast('BOSS FIGHT! Tap ATTACK')}
+function end(win){running=false;let reward=0,stars=0;if(win){reward=100+level*20+(level%5==0?150:0);stars=level%5==0?3:1;S.bank+=reward+runCoins;S.stars+=stars;if(level==S.unlocked&&S.unlocked<25)S.unlocked++;save()}else{S.bank+=runCoins;save()}setTimeout(()=>{menu.style.display='flex';hud.style.display='none';boostbar.style.display='none';$('bossHud').style.display='none';document.querySelector('.tag').textContent=win?`Level ${level} complete! +${reward+runCoins} coins • +${stars} ⭐`:`Level ${level} failed — collected ${runCoins} coins saved.`;if(win&&level<S.unlocked)level++;render()},500)}
+function loop(){
+ if(!running)return;frame++;let mult=active.turbo?1.5:1;let target=4300+level*250; if(!boss)dist+=speed*mult;
+ if(!boss&&frame%Math.max(58,105-level)===0)spawn();
+ p.vy+=.72;p.y+=p.vy;if(p.y>ground()-65){p.y=ground()-65;p.vy=0}if(p.slide)p.slide--;
+ for(let k in active)if(active[k]>0)active[k]--;
+ for(let o of objs){o.x-=speed*mult;if(active.magnet&&o.t==='coin'&&o.x<innerWidth*.75){o.x+=(p.x-o.x)*.045;o.y+=(p.y-o.y)*.045}}
+ let ph={x:p.x+8,y:p.y+(p.slide?31:5),w:42,h:p.slide?30:55};
+ for(let o of objs){if(o.dead)continue;if(overlap(ph,o)){if(o.t==='coin'){runCoins+=o.val;o.dead=true}else if(!active.shield){lives--;o.dead=true;if(lives<=0){end(false);return}}}}
+ objs=objs.filter(o=>o.x>-80&&!o.dead);
+ if(level%5===0&&!boss&&dist>=target){objs=[];beginBoss()}
+ if(level%5!==0&&dist>=target){end(true);return}
+ if(boss){boss.cool--;if(boss.cool<=0){boss.cool=90-Math.min(35,worldFor(level)*7);objs.push({t:'bossShot',x:boss.x,y:boss.y+45,w:38,h:28,e:'🔥'})}for(let s of shots)s.x+=11;for(let s of shots){if(!s.dead&&overlap(s,boss)){s.dead=true;boss.hp--;if(boss.hp<=0){end(true);return}}}shots=shots.filter(s=>s.x<innerWidth+40&&!s.dead);$('bossFill').style.width=(boss.hp/boss.max*100)+'%'}
+ draw(target);requestAnimationFrame(loop)
+}
+function draw(target){
+ let w=innerWidth,h=innerHeight,wo=W[worldFor(level)],g=ground(),gr=X.createLinearGradient(0,0,0,h);gr.addColorStop(0,wo.sky[0]);gr.addColorStop(1,wo.sky[1]);X.fillStyle=gr;X.fillRect(0,0,w,h);
+ X.globalAlpha=.35;X.font='70px serif';for(let i=0;i<8;i++)X.fillText(wo.icon,((i*180-dist*.12)%(w+250))-80,g-35-(i%2)*50);X.globalAlpha=1;
+ X.fillStyle=wo.ground;X.fillRect(0,g,w,h-g);X.font='42px serif';for(let o of objs)X.fillText(o.e,o.x,o.y+o.h);
+ if(boss){X.font='90px serif';X.fillText(boss.e,boss.x,boss.y+90);X.font='25px serif';for(let s of shots)X.fillText('✨',s.x,s.y+18)}
+ X.globalAlpha=active.shield?.55:1;X.font=p.slide?'40px serif':'54px serif';X.fillText(chars[sel][1],p.x,p.y+55);X.globalAlpha=1;
+ let pct=boss?100:Math.min(100,Math.floor(dist/target*100));hud.textContent=`${wo.icon} LEVEL ${level} • ${pct}% • 🪙 ${S.bank}+${runCoins} • ❤️ ${lives}`+(active.shield?' • 👻':'')+(active.turbo?' • ⚡':'')+(active.magnet?' • 🧲':'')
+}
+draw(1);
+</script></body></html>
