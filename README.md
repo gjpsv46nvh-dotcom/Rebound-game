@@ -1,10 +1,7 @@
-# REBOUND v14 – Realistic Characters + Sound
+# REBOUND v15 – Faster + Bigger Jumps
 
-- More human-like character proportions, faces, hair, clothing, boots and running poses.
-- Peyton remains the blonde princess with tiara.
-- Collectibles are now clearly rendered gold coins.
-- Coin collection plays a short click/chime sound.
-- Collisions play a crash sound and remove one life.
-- Three lives per level with brief post-hit invulnerability.
-- HUD shows coin count and remaining lives.
-- Keeps v13's faster game pace.
+- Game speed increased by 20% over v14.
+- Levels 1–5 still progressively increase in speed.
+- Standard jump is higher and stays airborne longer.
+- Double-tap high jump is substantially bigger and longer.
+- Keeps realistic-style runners, Peyton, gold coins, coin chime, crash sound and 3-life system.
