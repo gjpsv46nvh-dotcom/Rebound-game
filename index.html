@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>REBOUND v38</title><style>
+<title>REBOUND v39</title><style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;font-family:system-ui,-apple-system,sans-serif}canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
 #start{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#5429a7dd,#187bcddd,#23a971dd);z-index:5;padding:14px;overflow:auto}
 .startcard{width:min(620px,96vw);background:#122746e8;border:3px solid #ffffff66;border-radius:28px;padding:16px;text-align:center;box-shadow:0 18px 55px #0007}
@@ -39,6 +39,21 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 #go{position:relative;z-index:70;touch-action:manipulation;-webkit-tap-highlight-color:transparent;pointer-events:auto}
 #start{z-index:50;pointer-events:auto}
 @media (orientation:landscape){#rotateHint{display:none!important;pointer-events:none!important}}
+
+#hubbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px auto 10px}
+.hubtab{border:2px solid #ffffff55;border-radius:14px;background:#132c52;color:white;font-weight:900;padding:9px 13px}
+.hubtab.active{background:#ffd84a;color:#17213a}
+#hubpanel{width:min(94vw,760px);margin:0 auto 10px;background:#0c2140dd;border:2px solid #ffffff38;border-radius:18px;padding:12px}
+.hubsection{display:none}.hubsection.active{display:block}
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:9px}
+.pickcard{background:#17345d;border:2px solid #ffffff30;border-radius:15px;padding:10px;color:#fff;text-align:center;font-weight:800;min-height:82px}
+.pickcard.selected{border-color:#ffd84a;box-shadow:0 0 0 2px #ffd84a55 inset}
+.pickcard.locked{opacity:.72}
+.bigicon{font-size:34px;display:block;margin-bottom:4px}
+#customPreview{width:82px;height:82px;border-radius:50%;object-fit:cover;border:3px solid #fff;display:none;margin:8px auto}
+#photoInput{max-width:100%;font-size:16px}
+#bankBig{font-size:26px;font-weight:1000;color:#ffd84a}
+.smallnote{font-size:12px;opacity:.82}
 </style><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -53,6 +68,35 @@ canvas{display:block;max-width:100%;max-height:100%;object-fit:contain;margin:au
 <div class="tag">🎢 RUN • JUMP • SLIDE • COLLECT!</div>
 <div class="rewardbar"><span>🏆 REWARDS</span><span>🪙 <b id="bank">0</b></span><span>⭐ Complete levels to unlock more!</span></div>
 <div class="sectiontitle">🌟 CHOOSE YOUR LEVEL</div>
+
+<div id="hubbar">
+ <button class="hubtab active" data-tab="runner" type="button">🏃 RUNNER</button>
+ <button class="hubtab" data-tab="boots" type="button">🥾 BOOTS</button>
+ <button class="hubtab" data-tab="levels" type="button">🌟 LEVELS</button>
+ <button class="hubtab" data-tab="shop" type="button">🛍️ SHOP</button>
+</div>
+<div id="hubpanel">
+ <section class="hubsection active" id="tab-runner">
+   <div style="font-weight:1000;font-size:18px">Choose your runner</div>
+   <div class="cardgrid" id="runnerGrid"></div>
+   <div style="margin-top:12px;font-weight:1000">📷 CREATE MY RUNNER</div>
+   <div class="smallnote">Choose a photo from your phone. It stays in this browser on this device.</div>
+   <input id="photoInput" type="file" accept="image/*">
+   <img id="customPreview" alt="Custom runner preview">
+ </section>
+ <section class="hubsection" id="tab-boots">
+   <div style="font-weight:1000;font-size:18px">Choose your boots</div>
+   <div class="cardgrid" id="bootGrid"></div>
+ </section>
+ <section class="hubsection" id="tab-levels">
+   <div style="font-weight:1000;font-size:18px">Choose your level</div>
+ </section>
+ <section class="hubsection" id="tab-shop">
+   <div id="bankBig">🪙 0</div>
+   <div class="smallnote">Use coins earned from rounds and flawless bonuses to unlock runners and boots.</div>
+   <div id="shopMsg" style="margin-top:8px;font-weight:900"></div>
+ </section>
+</div>
 <div id="levelgrid"></div>
 <button id="go">▶ START ADVENTURE!</button>
 <div class="how">Swipe UP to jump • Swipe DOWN to slide • Collect coins • 3 lives</div>
@@ -116,6 +160,16 @@ function drawMovingWorld(){
  X.beginPath();X.moveTo(0,gy+27);X.lineTo(W,gy+27);X.stroke();X.setLineDash([]);
  X.fillStyle="#fff";X.font="900 "+Math.max(14,Math.min(22,W*.02))+"px system-ui";X.fillText(t.name,W*.5,31);
  X.textAlign="left";
+}
+
+
+function drawCustomFaceBadge(){
+ if(save.runner!=="custom"||!customRunnerData)return;
+ if(!window._customImg){window._customImg=new Image();window._customImg.src=customRunnerData}
+ let im=window._customImg;if(!im.complete)return;
+ let x=Math.max(90,W*.20)+92,y=ground()-178+jy;
+ X.save();X.beginPath();X.arc(x,y,24,0,Math.PI*2);X.clip();X.drawImage(im,x-28,y-28,56,56);X.restore();
+ X.strokeStyle="#fff";X.lineWidth=2;X.beginPath();X.arc(x,y,24,0,Math.PI*2);X.stroke();
 }
 
 function ground(){return H*.74}
@@ -234,10 +288,98 @@ C.addEventListener("pointerup",e=>{
  gestureStart=null;
  if(Math.abs(dy)>=34 && Math.abs(dy)>Math.abs(dx)*.75){
    if(dy<0){ jump(false); }       // swipe UP = jump
-   else { slide=Math.max(slide,130); } // swipe DOWN = long slide
+   else { slide=Math.max(slide,save.boot==="slider"?150:130); } // swipe DOWN = long slide
  }
  e.preventDefault();
 },{passive:false});
 C.addEventListener("pointercancel",()=>{gestureStart=null});
+
+
+// v39 RUNNER HUB
+const RUNNERS=[
+ {id:"peyton",name:"Peyton",icon:"👱‍♀️",cost:0},
+ {id:"nova",name:"Nova",icon:"🥷",cost:120},
+ {id:"rex",name:"Rex",icon:"🦸",cost:180},
+ {id:"luna",name:"Luna",icon:"🧙‍♀️",cost:240},
+ {id:"bolt",name:"Bolt",icon:"🤖",cost:300},
+ {id:"ace",name:"Ace",icon:"🧑‍🚀",cost:400}
+];
+const BOOTS=[
+ {id:"classic",name:"Classic",icon:"👟",cost:0,desc:"Balanced"},
+ {id:"spring",name:"Spring",icon:"🥾",cost:100,desc:"+10% jump"},
+ {id:"slider",name:"Glide",icon:"⛸️",cost:140,desc:"+15% slide"},
+ {id:"magnet",name:"Magnet",icon:"🧲",cost:220,desc:"Coin helper"},
+ {id:"turbo",name:"Turbo",icon:"⚡",cost:300,desc:"+5% speed"}
+];
+save.bank=Number(save.bank||0);
+save.runner=save.runner||"peyton";
+save.boot=save.boot||"classic";
+save.runners=Array.isArray(save.runners)?save.runners:["peyton"];
+save.boots=Array.isArray(save.boots)?save.boots:["classic"];
+let customRunnerData="";
+try{customRunnerData=localStorage.getItem("reboundCustomRunner")||""}catch(_){}
+
+function persistHub(){saveIt();renderHub()}
+function ownRunner(id){return save.runners.includes(id)||(id==="custom"&&!!customRunnerData)}
+function ownBoot(id){return save.boots.includes(id)}
+function buy(kind,item){
+ let owned=kind==="runner"?ownRunner(item.id):ownBoot(item.id);
+ if(owned){
+   if(kind==="runner")save.runner=item.id;else save.boot=item.id;
+   persistHub();return;
+ }
+ if(save.bank<item.cost){document.getElementById("shopMsg").textContent="You need "+(item.cost-save.bank)+" more coins.";return}
+ save.bank-=item.cost;
+ if(kind==="runner"){save.runners.push(item.id);save.runner=item.id}
+ else{save.boots.push(item.id);save.boot=item.id}
+ persistHub();
+}
+function renderHub(){
+ const rg=document.getElementById("runnerGrid"),bg=document.getElementById("bootGrid");
+ if(!rg||!bg)return;
+ rg.innerHTML="";
+ RUNNERS.forEach(r=>{
+   let b=document.createElement("button");b.type="button";b.className="pickcard"+(save.runner===r.id?" selected":"")+(ownRunner(r.id)?"":" locked");
+   b.innerHTML='<span class="bigicon">'+r.icon+'</span>'+r.name+'<br><small>'+(ownRunner(r.id)?"OWNED":"🪙 "+r.cost)+'</small>';
+   b.addEventListener("click",()=>buy("runner",r));rg.appendChild(b);
+ });
+ if(customRunnerData){
+   let b=document.createElement("button");b.type="button";b.className="pickcard"+(save.runner==="custom"?" selected":"");
+   b.innerHTML='<span class="bigicon">📷</span>My Runner<br><small>OWNED</small>';b.onclick=()=>{save.runner="custom";persistHub()};rg.appendChild(b);
+ }
+ bg.innerHTML="";
+ BOOTS.forEach(r=>{
+   let b=document.createElement("button");b.type="button";b.className="pickcard"+(save.boot===r.id?" selected":"")+(ownBoot(r.id)?"":" locked");
+   b.innerHTML='<span class="bigicon">'+r.icon+'</span>'+r.name+'<br><small>'+r.desc+' • '+(ownBoot(r.id)?"OWNED":"🪙 "+r.cost)+'</small>';
+   b.addEventListener("click",()=>buy("boot",r));bg.appendChild(b);
+ });
+ let bb=document.getElementById("bankBig");if(bb)bb.textContent="🪙 "+save.bank;
+ let bank=document.getElementById("bank");if(bank)bank.textContent=save.bank;
+ const pv=document.getElementById("customPreview");if(pv&&customRunnerData){pv.src=customRunnerData;pv.style.display="block"}
+}
+document.querySelectorAll(".hubtab").forEach(btn=>btn.addEventListener("click",()=>{
+ document.querySelectorAll(".hubtab").forEach(x=>x.classList.toggle("active",x===btn));
+ document.querySelectorAll(".hubsection").forEach(x=>x.classList.remove("active"));
+ let sec=document.getElementById("tab-"+btn.dataset.tab);if(sec)sec.classList.add("active");
+ const lg=document.getElementById("levelgrid");if(lg)lg.style.display=btn.dataset.tab==="levels"?"grid":"none";
+}));
+const photoInput=document.getElementById("photoInput");
+if(photoInput)photoInput.addEventListener("change",e=>{
+ const f=e.target.files&&e.target.files[0];if(!f)return;
+ if(!f.type.startsWith("image/"))return;
+ const rd=new FileReader();
+ rd.onload=()=>{
+   const im=new Image();
+   im.onload=()=>{
+     const cv=document.createElement("canvas"),max=360,sc=Math.min(1,max/Math.max(im.width,im.height));
+     cv.width=Math.max(1,Math.round(im.width*sc));cv.height=Math.max(1,Math.round(im.height*sc));
+     cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+     customRunnerData=cv.toDataURL("image/jpeg",.78);
+     try{localStorage.setItem("reboundCustomRunner",customRunnerData)}catch(_){}
+     save.runner="custom";persistHub();
+   };im.src=rd.result;
+ };rd.readAsDataURL(f);
+});
+renderHub();
 
 </script></body></html>
