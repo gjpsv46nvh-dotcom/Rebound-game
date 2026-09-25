@@ -24,14 +24,14 @@ h1{font-size:44px;margin:0}.tag{opacity:.72;margin:3px 0 14px}.section{margin-to
 <div id="bossHud">BOSS <div id="bossBar"><div id="bossFill"></div></div></div>
 <div class="bar" id="boostbar" style="display:none"></div><div class="toast" id="toast"></div>
 <div class="screen" id="menu"><div class="panel">
-<h1>RUNBOUND</h1><div class="tag">Run • Dodge • Collect • Upgrade • Defeat the bosses</div>
+<h1>RUNBOUND</h1><div class="tag">Run • Dodge • Collect • Upgrade • Reach the finish</div>
 <div>Bank: 🪙 <b id="bank"></b> &nbsp; | &nbsp; ⭐ <b id="stars"></b></div>
 <div class="section"><b>Choose Runner</b><div class="grid" id="chars"></div></div>
 <div class="section"><b>Worlds</b><div class="row" id="worlds"></div></div>
 <div class="section"><b>Levels</b><div class="row" id="levels"></div></div>
 <div class="section"><b>Boost Shop</b><div class="row" id="shop"></div></div>
 <button class="primary" id="play">PLAY LEVEL</button>
-<div class="tag">Tap = jump • double tap = high jump • swipe down = slide • tap ATTACK during boss fights</div>
+<div class="tag">Tap = jump • double tap = high jump • swipe down = slide</div>
 </div></div>
 <script>
 const C=document.getElementById('game'),X=C.getContext('2d'),DPR=()=>devicePixelRatio||1;
@@ -54,21 +54,21 @@ function render(){
  $('bank').textContent=S.bank;$('stars').textContent=S.stars;
  $('chars').innerHTML=''; chars.forEach((c,i)=>{let b=document.createElement('button'),locked=i>=S.charUnlocked;b.className='card '+(i==sel?'sel ':'')+(locked?'locked':'');b.innerHTML=`<span class=emoji>${locked?'🔒':c[1]}</span>${c[0]}${locked?`<small>${(i+1)*8} ⭐</small>`:''}`;b.onclick=()=>{if(!locked){sel=i;render()}else if(S.stars>=(i+1)*8){S.stars-=(i+1)*8;S.charUnlocked=i+1;save();render()}};$('chars').appendChild(b)});
  $('worlds').innerHTML='';W.forEach((w,i)=>{let min=i*5+1,locked=S.unlocked<min,b=document.createElement('button');b.className='world '+(locked?'locked':'');b.innerHTML=`${w.icon} <strong>${w.name}</strong><small>Levels ${min}-${min+4}</small>`;b.onclick=()=>{if(!locked){level=Math.max(min,Math.min(S.unlocked,min+4));render()}};$('worlds').appendChild(b)});
- $('levels').innerHTML='';let wi=worldFor(level),start=wi*5+1;for(let l=start;l<start+5;l++){let b=document.createElement('button');b.className='level '+(l==level?'sel':'');b.disabled=l>S.unlocked;b.textContent=(l%5==0?'👑 ':'')+'Level '+l;b.onclick=()=>{level=l;render()};$('levels').appendChild(b)}
+ $('levels').innerHTML='';let wi=worldFor(level),start=wi*5+1;for(let l=start;l<start+5;l++){let b=document.createElement('button');b.className='level '+(l==level?'sel':'');b.disabled=l>S.unlocked;b.textContent='Level '+l;b.onclick=()=>{level=l;render()};$('levels').appendChild(b)}
  $('shop').innerHTML='';Object.entries(boosts).forEach(([k,v])=>{let b=document.createElement('button');b.className='boost';b.innerHTML=`${v.i} ${v.n}<small>${v.d}</small><small>🪙 ${v.c} • Owned ${S[k]}</small>`;b.onclick=()=>{if(S.bank>=v.c){S.bank-=v.c;S[k]++;save();render()}else showToast('Not enough coins')};$('shop').appendChild(b)})
 }
 render();
 let running=false,frame=0,dist=0,runCoins=0,lives=3,objs=[],shots=[],speed=6,p={x:110,y:0,vy:0,slide:0},active={shield:0,turbo:0,magnet:0},boss=null,lastTap=0,sy=0;
-let intro=0, introRAF=0, platforms=[], hazards=[], collapse=[], chase=null;
+let intro=0, introRAF=0, platforms=[], hazards=[], collapse=[], chase=null,finishShown=false;
 const ground=()=>innerHeight-105;
-function boostUI(){boostbar.innerHTML='';for(let [k,v] of Object.entries(boosts)){let b=document.createElement('button');b.textContent=`${v.i} ${S[k]}`;b.disabled=!S[k];b.onclick=()=>{if(!S[k])return;S[k]--;if(k==='heart')lives++;else active[k]=600;save();boostUI()};boostbar.appendChild(b)}if(boss){let a=document.createElement('button');a.textContent='💥 ATTACK';a.onclick=attack;boostbar.appendChild(a)}}
+function boostUI(){boostbar.innerHTML='';for(let [k,v] of Object.entries(boosts)){let b=document.createElement('button');b.textContent=`${v.i} ${S[k]}`;b.disabled=!S[k];b.onclick=()=>{if(!S[k])return;S[k]--;if(k==='heart')lives++;else active[k]=600;save();boostUI()};boostbar.appendChild(b)}}
 function start(){
  menu.style.display='none';hud.style.display='none';boostbar.style.display='none';intro=0;running=false;
  planeIntro();
 }
 function beginRun(){
- hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];platforms=[];hazards=[];collapse=[];chase=null;
- speed=6+level*.12;p.y=ground()-180;p.vy=2;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
+ hud.style.display='block';boostbar.style.display='flex';frame=dist=runCoins=0;lives=3;objs=[];shots=[];platforms=[];hazards=[];collapse=[];chase=null;finishShown=false;
+ speed=(level===1?4.25:5.1+level*.10);p.y=ground()-180;p.vy=2;active={shield:0,turbo:0,magnet:0};boss=null;$('bossHud').style.display='none';running=true;boostUI();requestAnimationFrame(loop)
 }
 function planeIntro(){
  intro++;
@@ -95,12 +95,12 @@ function spawn(){
  else if(r<.84){platforms.push({x:innerWidth+40,y:g-120-Math.random()*70,w:150,h:20,vy:(Math.random()<.5?-1:1)*.7});}
  else if(r<.93){collapse.push({x:innerWidth+30,y:g,w:180,h:25,timer:150});}
  else objs.push({t:'rock',x:innerWidth+50,y:g-40,w:45,h:40,e:'🪨'});
- if(level>=2 && Math.random()<.18 && !chase) chase={x:-90,y:g-62,w:60,h:60,e:'👹',life:360};
+ if(level>=2 && Math.random()<.12 && !chase) chase={x:-90,y:g-62,w:60,h:60,e:'👹',life:360};
 }
 function overlap(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y}
 function attack(){if(!boss||!running)return;shots.push({x:p.x+45,y:p.y+22,w:22,h:12});}
-function beginBoss(){let w=W[worldFor(level)];boss={x:innerWidth-150,y:ground()-120,w:100,h:110,hp:8+worldFor(level)*4,max:8+worldFor(level)*4,e:w.boss,cool:0};$('bossHud').style.display='block';boostUI();showToast('BOSS FIGHT! Tap ATTACK')}
-function end(win){running=false;let reward=0,stars=0;if(win){reward=100+level*20+(level%5==0?150:0);stars=level%5==0?3:1;S.bank+=reward+runCoins;S.stars+=stars;if(level==S.unlocked&&S.unlocked<25)S.unlocked++;save()}else{S.bank+=runCoins;save()}setTimeout(()=>{menu.style.display='flex';hud.style.display='none';boostbar.style.display='none';$('bossHud').style.display='none';document.querySelector('.tag').textContent=win?`Level ${level} complete! +${reward+runCoins} coins • +${stars} ⭐`:`Level ${level} failed — collected ${runCoins} coins saved.`;if(win&&level<S.unlocked)level++;render()},500)}
+function beginBoss(){let w=W[worldFor(level)];boss={x:innerWidth-150,y:ground()-120,w:100,h:110,hp:8+worldFor(level)*4,max:8+worldFor(level)*4,e:w.boss,cool:0};$('bossHud').style.display='none';boostUI();showToast('BOSS FIGHT! Tap ATTACK')}
+function end(win){running=false;let reward=0,stars=0;if(win){reward=100+level*20;stars=1;S.bank+=reward+runCoins;S.stars+=stars;if(level==S.unlocked&&S.unlocked<25)S.unlocked++;save()}else{S.bank+=runCoins;save()}setTimeout(()=>{menu.style.display='flex';hud.style.display='none';boostbar.style.display='none';$('bossHud').style.display='none';document.querySelector('.tag').textContent=win?`Level ${level} complete! +${reward+runCoins} coins • +${stars} ⭐`:`Level ${level} failed — collected ${runCoins} coins saved.`;if(win&&level<S.unlocked)level++;render()},500)}
 function loop(){
  if(!running)return;frame++;let mult=active.turbo?1.5:1;let target=level<=3?3300+level*250:4300+level*250; if(!boss)dist+=speed*mult;
  if(!boss&&frame%Math.max(38,72-level*2)===0)spawn();
@@ -119,8 +119,14 @@ function loop(){
  // Collapsing ground creates a danger zone once its timer expires.
  for(let q of collapse){if(q.timer<70 && p.x+35>q.x && p.x<q.x+q.w && p.y>=ground()-70 && !active.shield){lives--;q.dead=true;p.vy=-10;if(lives<=0){end(false);return}}}
  objs=objs.filter(o=>o.x>-80&&!o.dead);platforms=platforms.filter(q=>q.x+q.w>-60);hazards=hazards.filter(q=>q.y<innerHeight+80&&!q.dead);collapse=collapse.filter(q=>q.x+q.w>-60&&!q.dead);
- if(level%5===0&&!boss&&dist>=target){objs=[];beginBoss()}
- if(level%5!==0&&dist>=target){end(true);return}
+ 
+ if(dist>=target && !finishShown){
+   finishShown=true; objs=[]; hazards=[]; collapse=[]; platforms=[];
+ }
+ if(finishShown){
+   // Let the runner visibly cross a finish line before completing.
+   if(dist>=target+520){end(true);return}
+ }
  if(boss){boss.cool--;if(boss.cool<=0){boss.cool=90-Math.min(35,worldFor(level)*7);objs.push({t:'bossShot',x:boss.x,y:boss.y+45,w:38,h:28,e:'🔥'})}for(let s of shots)s.x+=11;for(let s of shots){if(!s.dead&&overlap(s,boss)){s.dead=true;boss.hp--;if(boss.hp<=0){end(true);return}}}shots=shots.filter(s=>s.x<innerWidth+40&&!s.dead);$('bossFill').style.width=(boss.hp/boss.max*100)+'%'}
  draw(target);requestAnimationFrame(loop)
 }
@@ -146,6 +152,16 @@ function draw(target){
    X.beginPath();X.moveTo(rx,ry+43);X.lineTo(rx+swing,ry+63);X.moveTo(rx,ry+43);X.lineTo(rx-swing,ry+63);X.stroke();
  }
  X.font='35px serif';X.fillText(chars[sel][1],rx-18,ry+15);X.globalAlpha=1;
+ if(true){
+   let remain=target-dist;
+   if(remain<520){
+     let fx=innerWidth-80+Math.max(0,remain);
+     X.fillStyle='#fff';X.fillRect(fx,ground()-150,8,150);X.fillRect(fx+110,ground()-150,8,150);
+     X.fillStyle='#17243a';X.fillRect(fx-8,ground()-150,134,38);
+     X.fillStyle='#fff';X.font='900 18px system-ui';X.fillText('FINISH',fx+22,ground()-124);
+     X.font='28px serif';X.fillText('🏁',fx+48,ground()-158);
+   }
+ }
  let pct=boss?100:Math.min(100,Math.floor(dist/target*100));hud.textContent=`${wo.icon} LEVEL ${level} • ${pct}% • 🪙 ${S.bank}+${runCoins} • ❤️ ${lives}`+(active.shield?' • 👻':'')+(active.turbo?' • ⚡':'')+(active.magnet?' • 🧲':'')
 }
 draw(1);
