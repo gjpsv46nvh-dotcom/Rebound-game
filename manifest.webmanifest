@@ -1,7 +1,7 @@
 {
   "name": "REBOUND Runner",
   "short_name": "REBOUND",
-  "start_url": "./",
+  "start_url": "./?v=33",
   "display": "standalone",
   "background_color": "#10223e",
   "theme_color": "#10223e",
@@ -17,5 +17,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "id": "./?v=33"
 }
