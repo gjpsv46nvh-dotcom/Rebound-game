@@ -1,6 +1,7 @@
-# REBOUND v27
-- Fixed runner extraction to retain the complete head, hair, face, body and legs.
-- Restored the kid-friendly REBOUND start screen.
-- 25-level selector with locked/unlocked progression.
-- Rewards/coin bank restored: collected coins are banked after completing a level.
-- Large side-scrolling runner, jump/slide, 3 lives, coins, ramps and barriers.
+# REBOUND v28
+- Runner is 25% smaller than v27.
+- Runner moved farther sideways/forward into the screen.
+- Game speed increased by 20%.
+- Stronger running cycle: forward lean, body bob and alternating leg stride.
+- Start screen with 25 levels and rewards/coin bank retained.
+- Jump, slide, 3 lives, coins, ramps and barriers retained.
